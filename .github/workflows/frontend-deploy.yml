@@ -39,11 +39,6 @@ jobs:
       - name: make .env file
         run: |
           echo "ENVIRONMENT=production" >> .env
-
-      - name: Run a multi-line script
-        run: |
-          yarn 
-          yarn build
       
       - name: Deploy
         id: deploy
