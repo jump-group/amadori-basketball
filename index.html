@@ -204,12 +204,6 @@
     width: 100%;
   }
 
-  #game-over-screen .description {
-    font-size: 32px;
-    font-weight: 500;
-    line-height: normal;
-  }
-
   #game-over-screen button {
     background-color: white;
     color: #005832;
@@ -225,6 +219,20 @@
 
   #game-over-screen button:hover {
     background-color: #e0b000;
+  }
+
+  /* Nuovo stile per il contatore dei tiri */
+  #shots-counter {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 88, 50, 0.8); /* Sfondo verde scuro semi-trasparente */
+    color: #FFF;
+    font-size: 2em;
+    padding: 10px 20px;
+    border-radius: 10px;
+    z-index: 1002; /* Sopra tutto il resto */
+    font-weight: bold;
   }
   </style>
 </head>
@@ -251,6 +259,11 @@
   <div class="logo-game-screen">
     <img  src="assets/images/amadori_logo.svg" alt="Logo Amadori">
   </div>
+
+  <div id="shots-counter">
+    Tiri: <span id="current-shots">0</span>/<span id="max-shots">20</span>
+  </div>
+
   <div class="GameContainer" id="game-container"></div>
   <span class="footer-text">Trascina rapidamente la palla per lanciarla nel canestro!</span>
 
@@ -270,6 +283,10 @@
     var gameOverScreen;     // Riferimento al div della schermata di game over
     var finalScoreText;     // Riferimento allo span del punteggio finale
     var restartButton;      // Riferimento al pulsante di riavvio
+
+    // Nuove variabili per il contatore dei tiri nell'HTML
+    var currentShotsElement;
+    var maxShotsElement;
 
     function preload() {
       game.load.image('field', 'assets/images/field.png');
@@ -398,6 +415,7 @@
       game.world.bringToTop(current_best_text);
       game.world.bringToTop(current_best_score_text);
 
+      
 
       createBall();
 
@@ -410,6 +428,12 @@
       restartButton = document.getElementById('restartButton');
 
        restartButton.addEventListener('click', restartGame);
+
+      // Inizializza gli elementi del contatore tiri
+      currentShotsElement = document.getElementById('current-shots');
+      maxShotsElement = document.getElementById('max-shots');
+      maxShotsElement.textContent = maxShots; // Imposta il valore massimo dei tiri
+      updateShotsCounter(); // Aggiorna il contatore all'inizio
 
       // Aggiungi un listener solo al pulsante
       startButton.addEventListener('click', function() {
@@ -427,23 +451,31 @@
       }.bind(this)); // Bind 'this' per mantenere il contesto di Phaser
     }
 
+    function updateShotsCounter() {
+        currentShotsElement.textContent = totalShots;
+    }
+
     function restartGame() {
         // Nascondi la schermata di Game Over
         gameOverScreen.classList.remove('show');
 
         // Resetta lo stato del gioco
         totalShots = 0;
-        current_score = 0; // Resetta il punteggio corrente
-        // high_score non viene resettato, rimane il record (se vuoi resettarlo, fallo qui)
-
+        current_score = 0; // Resetta il punteggio corrente per la nuova partita
+        // high_score NON viene resettato qui, mantiene il record storico
+        
         // Reset della palla e dell'interfaccia utente come all'inizio di un nuovo gioco
         createBall();
         current_score_text.text = current_score; // Imposta a 0
         current_score_text.alpha = 1;
         current_score_bg.alpha = 1;
+        
+        // Assicurati che il record sia nascosto all'inizio di una nuova partita
         current_best_text.alpha = 0;
         current_best_score_text.alpha = 0;
         high_score_bg.alpha = 0;
+
+        updateShotsCounter(); // Aggiorna il contatore dei tiri
 
         // Assicurati che l'input del gioco sia abilitato
         game.input.onDown.add(click, this);
@@ -479,25 +511,30 @@
                 current_score += 1;
                 current_score_text.text = current_score;
                 score_sound.play();
-// In caso di canestro, il punteggio corrente rimane visibile, il record è nascosto
+
+                // Aggiorna high_score solo se il current_score è maggiore
+                if (current_score > high_score) {
+                    high_score = current_score;
+                }
+                
+                // In caso di canestro, il punteggio corrente rimane visibile, il record è nascosto (fino a fine partita)
                 current_score_bg.alpha = 1;
                 current_score_text.alpha = 1;
-
                 high_score_bg.alpha = 0;
                 current_best_text.alpha = 0;
                 current_best_score_text.alpha = 0;
+
             } else {
                 emojiName = "lose" + rand;
                 fail.play();
-                if (current_score > high_score) high_score = current_score;
-                 current_score = 0; // Reset del punteggio corrente
-
-                // In caso di errore, nascondi il punteggio corrente e mostra il record
+                // NON resettare current_score a 0 qui, lo lasciamo per la prossima palla
+                
+                // Mostra il record attuale (non il punteggio corrente)
                 current_score_text.alpha = 0; // Nascondi il testo del punteggio corrente
                 current_score_bg.alpha = 0;   // Nascondi il suo sfondo
 
                 current_best_text.text = 'Il tuo record';
-                current_best_score_text.text = high_score;
+                current_best_score_text.text = high_score; // Mostra il record storico
                 high_score_bg.alpha = 1; // Mostra lo sfondo del record
                 current_best_text.alpha = 1; // Mostra il testo "Il tuo record"
                 current_best_score_text.alpha = 1; // Mostra il numero del record
@@ -548,12 +585,12 @@
       ball.launched = false;
       ball.isBelowHoop = false;
 
-      // Al reset della palla, mostriamo il punteggio corrente e nascondiamo il record
+      // Quando viene creata una nuova palla, mostra il punteggio corrente (non il record)
       current_score_text.text = current_score;
       current_score_text.alpha = 1;
       current_score_bg.alpha = 1;
 
-current_best_text.alpha = 0;
+      current_best_text.alpha = 0;
       current_best_score_text.alpha = 0;
       high_score_bg.alpha = 0;
     }
@@ -587,12 +624,10 @@ current_best_text.alpha = 0;
        ball.body.setCircle(36 * scaleFactor * 0.6);
         ball.body.setCollisionGroup(collisionGroup);
 
-        // Nascondi il record quando si lancia la palla
+        // Nascondi il record quando si lancia la palla, mostra il punteggio corrente
         high_score_bg.alpha = 0;
         current_best_text.alpha = 0;
         current_best_score_text.alpha = 0;
-
-        // Assicurati che il punteggio corrente sia visibile (se non lo è già)
         current_score_bg.alpha = 1;
         current_score_text.alpha = 1;
 
@@ -604,9 +639,9 @@ current_best_text.alpha = 0;
         ball.body.rotateRight(x_traj / 3);
         whoosh.play();
 
-        // Incrementa il contatore dei tiri
+        // Incrementa il contatore dei tiri e aggiorna l'elemento HTML
         totalShots++;
-        console.log("Tiro numero: " + totalShots); // Per debug
+        updateShotsCounter();
       }
     }
 
