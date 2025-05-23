@@ -6,16 +6,162 @@
   <title>Amadori Basketball</title>
   <script src="js/phaser.min.js"></script>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <style>
+  body {
+    margin: 0px;
+    overflow: hidden; /* Prevent scrollbars */
+    display: flex; /* Use flexbox for centering content */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    min-height: 100vh; /* Ensure body takes full viewport height */
+    background-color: #005832; /* Dark background for body to see contrast */
+    font-family: "Barlow", sans-serif;
+  }
+
+  /* Style for the introduction screen */
+  #intro-screen {
+    position: fixed; /* Fixed position to cover the entire viewport */
+    width: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #005832; /* Colore di sfondo verde */
+    background-image: url('assets/images/webspace_bg.png'); /* Immagine di sfondo */
+    background-size: contain; /* Copre l'intera area */
+    background-position: bottom; /* Centra l'immagine */
+    background-repeat: no-repeat; /* Non ripetere l'immagine */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 9999; /* High z-index to be on top of everything */
+    color: #FFF; /* Text color */
+    font-family: "Barlow", sans-serif;
+    text-align: center;
+    transition: opacity 1s ease-out; /* Smooth fade out effect */
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  #intro-screen.fade-out {
+    opacity: 0;
+    visibility: hidden; /* Hide element after fading out */
+  }
+
+  #intro-screen img {
+    max-width: 80%; /* Adjust size of your logo */
+    width: 50%;
+    height: auto;
+    margin-top: 4rem;
+  }
+
+  #intro-screen h1 {
+    font-size: 3.5em; /* Adjust font size for title */
+    margin-bottom: 20px;
+  }
+
+  #intro-screen p {
+    font-size: 1.5em; /* Adjust font size for body text */
+    line-height: 1.5;
+    max-width: 80%;
+    margin: 0;
+  }
+
+  #intro-screen .subtitle {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: normal;
+    margin: 0;
+  }
+
+  #intro-screen .subtitle span {
+    color: #FFC511;
+  }
+
+  #intro-screen .textContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+
+  }
+
+  #intro-screen .description {
+    font-size: 32px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  #intro-screen button {
+    background-color: white; /* Button background color */
+    color: #005832; /* Button text color */
+    font-size: 2em;
+    padding: 16px 64px;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+  }
+
+  #intro-screen button:hover {
+    background-color: #e0b000; /* Darker yellow on hover */
+  }
+
+  .footer-text {
+    font-size: 24px;
+    color: #FFF; /* White color for better visibility */
+    text-align: center;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  .logo-game-screen {
+    position: fixed;
+    top: 20px;
+  }
+  </style>
 </head>
 <body>
+  <div id="intro-screen">
+    <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+    <h1>Benvenut*!</h1>
+    <div class="textContainer">
+        <p class="subtitle">Pront* per il <br> <span>Basket Corner</span> di Amadori? 🏀</p>
+        <p class="description">Metti alla prova la tua abilità! <br> Tira, segna e scala la classifica:  <br> più punti fai, più diventerai un PRO!</p>
+    </div>
+    <button id="startButton">Gioca ora</button>
+  </div>
+  
+  <div class="logo-game-screen">
+    <img  src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+  </div>
   <div class="GameContainer" id="game-container"></div>
+  <span class="footer-text">Trascina rapidamente la palla per lanciarla nel canestro!</span>
 
   <script>
-    var game = new Phaser.Game(400, 625, Phaser.CANVAS, 'game-container', {
+    var gameWidth = 810;
+    var gameHeight = 1080;
+
+    var game = new Phaser.Game(gameWidth, gameHeight, Phaser.CANVAS, 'game-container', {
       preload: preload,
       create: create,
       update: update
     });
+
+    var introShown = false; // Variabile per tenere traccia se l'introduzione è stata mostrata
 
     function preload() {
       game.load.image('ball', 'assets/images/ball.png');
@@ -23,7 +169,7 @@
       game.load.image('side rim', 'assets/images/side_rim.png');
       game.load.image('front rim', 'assets/images/front_rim.png');
 
-      for (var i = 0; i <= 4; i++) {
+      for (var i = 0; i <= 3; i++) {
         game.load.image('win' + i, 'assets/images/win' + i + '.png');
         game.load.image('lose' + i, 'assets/images/lose' + i + '.png');
       }
@@ -42,11 +188,14 @@
     var collisionGroup;
     var isDown = false, start_location, end_location, location_interval;
 
+    var scaleFactor = 2;
+
     function create() {
-      game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+      game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
       game.scale.pageAlignHorizontally = true;
       game.scale.pageAlignVertically = true;
       game.scale.refresh();
+
       window.addEventListener('resize', function () {
         game.scale.refresh();
       });
@@ -63,72 +212,117 @@
       fail = game.add.audio('fail'); fail.volume = 0.1;
       spawn = game.add.audio('spawn');
 
-      game.stage.backgroundColor = "#ffffff";
+      game.stage.backgroundColor = "#005832";
 
-      current_score_text = game.add.text(187, 312, '', { font: 'Arial', fontSize: '40px', fill: '#000', align: 'center' });
-      current_best_text = game.add.text(143, 281, '', { font: 'Arial', fontSize: '20px', fill: '#000', align: 'center' });
-      current_best_score_text = game.add.text(187, 312, '', { font: 'Arial', fontSize: '40px', fill: '#00e6e6', align: 'center' });
+      hoop = game.add.sprite(gameWidth / 2, gameHeight * 0.05, 'hoop');
+      hoop.anchor.setTo(0.5, 0);
+      hoop.scale.setTo(scaleFactor, scaleFactor);
 
-      hoop = game.add.sprite(88, 62, 'hoop');
-      left_rim = game.add.sprite(150, 184, 'side rim');
-      right_rim = game.add.sprite(249, 184, 'side rim');
+      left_rim = game.add.sprite(hoop.x - (50 * scaleFactor), hoop.y + (122 * scaleFactor), 'side rim');
+      left_rim.anchor.setTo(0.5, 0.5);
+      left_rim.scale.setTo(scaleFactor, scaleFactor);
+
+      right_rim = game.add.sprite(hoop.x + (50 * scaleFactor), hoop.y + (122 * scaleFactor), 'side rim');
+      right_rim.anchor.setTo(0.5, 0.5);
+      right_rim.scale.setTo(scaleFactor, scaleFactor);
 
       game.physics.p2.enable([left_rim, right_rim], false);
-      left_rim.body.setCircle(2.5); left_rim.body.static = true;
-      right_rim.body.setCircle(2.5); right_rim.body.static = true;
+      left_rim.body.setCircle(2.5 * scaleFactor);
+      left_rim.body.static = true;
+      right_rim.body.setCircle(2.5 * scaleFactor);
+      right_rim.body.static = true;
 
       left_rim.body.setCollisionGroup(collisionGroup);
       right_rim.body.setCollisionGroup(collisionGroup);
       left_rim.body.collides([collisionGroup]);
       right_rim.body.collides([collisionGroup]);
 
+      current_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '0', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
+      current_score_text.anchor.setTo(0.5, 0.5);
+
+      current_best_text = game.add.text(gameWidth / 2, hoop.y + (200 * scaleFactor), '', { font: 'Arial', fontSize: (20 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
+      current_best_text.anchor.setTo(0.5, 0.5);
+
+      current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
+      current_best_score_text.anchor.setTo(0.5, 0.5);
+
       createBall();
 
-      cursors = game.input.keyboard.createCursorKeys();
-      game.input.onDown.add(click, this);
-      game.input.onUp.add(release, this);
+      // Gestione della pagina introduttiva
+      var introScreen = document.getElementById('intro-screen');
+      var startButton = document.getElementById('startButton'); // Ottieni il riferimento al pulsante
+
+      // Aggiungi un listener solo al pulsante
+      startButton.addEventListener('click', function() {
+          if (!introShown) {
+              introScreen.classList.add('fade-out'); // Avvia la transizione CSS
+              // Rimuovi lo schermo intro dopo la transizione (1 secondo)
+              setTimeout(function() {
+                  introScreen.style.display = 'none';
+                  introShown = true;
+                  // Ora che l'intro è andata, abilita gli input del gioco
+                  game.input.onDown.add(click, this);
+                  game.input.onUp.add(release, this);
+              }.bind(this), 1000); // 1000ms = 1s, deve corrispondere alla durata della transizione CSS
+          }
+      }.bind(this)); // Bind 'this' per mantenere il contesto di Phaser
     }
 
     function update() {
-      if (ball && ball.body.velocity.y > 0) {
-        front_rim = game.add.sprite(148, 182, 'front rim');
-        ball.body.collides([collisionGroup], hitRim, this);
-      }
-
-      if (ball && ball.body.velocity.y > 0 && ball.body.y > 188 && !ball.isBelowHoop) {
-        ball.isBelowHoop = true;
-        ball.body.collideWorldBounds = false;
-        var rand = Math.floor(Math.random() * 5);
-        if (ball.body.x > 151 && ball.body.x < 249) {
-          emojiName = "win" + rand;
-          current_score += 1;
-          current_score_text.text = current_score;
-          score_sound.play();
-        } else {
-          emojiName = "lose" + rand;
-          fail.play();
-          if (current_score > high_score) high_score = current_score;
-          current_score = 0;
-          current_score_text.text = '';
-          current_best_text.text = 'Current Best';
-          current_best_score_text.text = high_score;
+        // Solo aggiorna la logica del gioco se l'introduzione è stata mostrata
+        if (!introShown) {
+            return; // Esci dalla funzione update se l'intro è ancora attiva
         }
-        emoji = game.add.sprite(180, 100, emojiName);
-        emoji.scale.setTo(0.25, 0.25);
-        moveInTween = game.add.tween(emoji).from({ y: 150 }, 500, Phaser.Easing.Elastic.Out, true);
-        fadeInTween = game.add.tween(emoji).from({ alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-        moveInTween.onComplete.add(tweenOut, this);
-      }
 
-      if (ball && ball.body.y > 1200) {
-        game.physics.p2.gravity.y = 0;
-        ball.kill();
-        createBall();
-      }
+        if (ball && ball.body.velocity.y > 0 && !front_rim) {
+            front_rim = game.add.sprite(hoop.x - (52 * scaleFactor), hoop.y + (120 * scaleFactor), 'front rim');
+            front_rim.scale.setTo(scaleFactor, scaleFactor);
+        }
+        if (ball && ball.body.velocity.y < 0 && front_rim) {
+            front_rim.destroy();
+            front_rim = null;
+        }
+
+        if (ball && ball.body.velocity.y > 0) {
+            ball.body.collides([collisionGroup], hitRim, this);
+        }
+
+        if (ball && ball.body.velocity.y > 0 && ball.body.y > (hoop.y + hoop.height * 0.75) && !ball.isBelowHoop) {
+            ball.isBelowHoop = true;
+            ball.body.collideWorldBounds = false;
+
+            var rand = Math.floor(Math.random() * 5);
+            if (ball.body.x > left_rim.x && ball.body.x < right_rim.x) {
+                emojiName = "win" + rand;
+                current_score += 1;
+                current_score_text.text = current_score;
+                score_sound.play();
+            } else {
+                emojiName = "lose" + rand;
+                fail.play();
+                if (current_score > high_score) high_score = current_score;
+                current_score = 0;
+                current_score_text.text = '';
+                current_best_text.text = 'Il tuo record';
+                current_best_score_text.text = high_score;
+            }
+            emoji = game.add.sprite(gameWidth / 2, gameHeight * 0.25, emojiName);
+            emoji.anchor.setTo(0.5, 0.5);
+            emoji.scale.setTo(0.25 * scaleFactor, 0.25 * scaleFactor);
+            moveInTween = game.add.tween(emoji).from({ y: emoji.y + (50 * scaleFactor) }, 500, Phaser.Easing.Elastic.Out, true);
+            fadeInTween = game.add.tween(emoji).from({ alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
+            moveInTween.onComplete.add(tweenOut, this);
+        }
+
+        if (ball && ball.body.y > gameHeight + (100 * scaleFactor)) {
+            game.physics.p2.gravity.y = 0;
+            ball.kill();
+            createBall();
+        }
     }
 
     function tweenOut() {
-      moveOutTween = game.add.tween(emoji).to({ y: 50 }, 600, Phaser.Easing.Elastic.In, true);
+      moveOutTween = game.add.tween(emoji).to({ y: emoji.y - (50 * scaleFactor) }, 600, Phaser.Easing.Elastic.In, true);
       moveOutTween.onComplete.add(() => emoji.kill(), this);
       setTimeout(() => {
         fadeOutTween = game.add.tween(emoji).to({ alpha: 0 }, 300, Phaser.Easing.Linear.None, true, 0, 0, false);
@@ -140,12 +334,13 @@
     }
 
     function createBall() {
-      var xpos = (current_score === 0) ? 200 : 60 + Math.random() * 280;
+      var xpos = (current_score === 0) ? gameWidth / 2 : gameWidth * 0.2 + Math.random() * (gameWidth * 0.6);
       spawn.play();
-      ball = game.add.sprite(xpos, 547, 'ball');
-      game.add.tween(ball.scale).from({ x: 0.7, y: 0.7 }, 100, Phaser.Easing.Linear.None, true);
+      ball = game.add.sprite(xpos, gameHeight * 0.82, 'ball');
+      ball.anchor.setTo(0.5, 0.5);
+      game.add.tween(ball.scale).from({ x: 0.7 * scaleFactor, y: 0.7 * scaleFactor }, 100, Phaser.Easing.Linear.None, true);
       game.physics.p2.enable(ball, false);
-      ball.body.setCircle(60);
+      ball.body.setCircle(60 * scaleFactor * 0.6);
       ball.launched = false;
       ball.isBelowHoop = false;
     }
@@ -168,7 +363,7 @@
         end_location = [pointer.x, pointer.y];
         if (end_location[1] < start_location[1]) {
           var slope = [end_location[0] - start_location[0], end_location[1] - start_location[1]];
-          var x_traj = -2300 * slope[0] / slope[1];
+          var x_traj = -2300 * scaleFactor * slope[0] / slope[1];
           launch(x_traj);
         }
       }
@@ -176,15 +371,15 @@
 
     function launch(x_traj) {
       if (!ball.launched) {
-        ball.body.setCircle(36);
+        ball.body.setCircle(36 * scaleFactor * 0.6);
         ball.body.setCollisionGroup(collisionGroup);
         current_best_text.text = '';
         current_best_score_text.text = '';
         ball.launched = true;
-        game.physics.p2.gravity.y = 3000;
-        game.add.tween(ball.scale).to({ x: 0.6, y: 0.6 }, 500, Phaser.Easing.Linear.None, true);
+        game.physics.p2.gravity.y = 3000 * scaleFactor;
+        game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
         ball.body.velocity.x = x_traj;
-        ball.body.velocity.y = -1750;
+        ball.body.velocity.y = -1750 * scaleFactor;
         ball.body.rotateRight(x_traj / 3);
         whoosh.play();
       }
