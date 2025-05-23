@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,100;1,800;1,900&display=swap" rel="stylesheet">
 
   <style>
   body {
@@ -33,19 +33,18 @@
     height: 100%;
     background-color: #005832; /* Colore di sfondo verde */
     background-image: url('assets/images/webspace_bg.png'); /* Immagine di sfondo */
-    background-size: contain; /* Copre l'intera area */
-    background-position: bottom; /* Centra l'immagine */
+    background-size: contain; /* Adatta l'immagine mantenendo le proporzioni, potrebbe lasciare spazi vuoti */
+    background-position: bottom; /* Allinea l'immagine al fondo */
     background-repeat: no-repeat; /* Non ripetere l'immagine */
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* Centra verticalmente il contenuto dell'intro screen */
     z-index: 9999; /* High z-index to be on top of everything */
     color: #FFF; /* Text color */
     font-family: "Barlow", sans-serif;
     text-align: center;
     transition: opacity 1s ease-out; /* Smooth fade out effect */
-    display: flex;
-    flex-direction: column;
     gap: 2rem;
   }
 
@@ -58,7 +57,7 @@
     max-width: 80%; /* Adjust size of your logo */
     width: 50%;
     height: auto;
-    margin-top: 4rem;
+    margin-top: 4rem; /* Spostato leggermente più in basso per lasciare spazio sopra */
   }
 
   #intro-screen h1 {
@@ -131,6 +130,15 @@
   .logo-game-screen {
     position: fixed;
     top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001; /* Assicurati che sia sopra il canvas di Phaser */
+    width: 200px; /* Esempio di dimensione, adatta alle tue esigenze */
+  }
+
+  .logo-game-screen img {
+      width: 100%;
+      height: auto;
   }
   </style>
 </head>
@@ -144,7 +152,7 @@
     </div>
     <button id="startButton">Gioca ora</button>
   </div>
-  
+
   <div class="logo-game-screen">
     <img  src="assets/images/amadori_logo.svg" alt="Logo Amadori">
   </div>
@@ -164,6 +172,8 @@
     var introShown = false; // Variabile per tenere traccia se l'introduzione è stata mostrata
 
     function preload() {
+      game.load.image('field', 'assets/images/field.png');
+
       game.load.image('ball', 'assets/images/ball.png');
       game.load.image('hoop', 'assets/images/hoop.png');
       game.load.image('side rim', 'assets/images/side_rim.png');
@@ -181,7 +191,7 @@
       game.load.audio('spawn', 'assets/audio/spawn.wav');
     }
 
-    var hoop, left_rim, right_rim, ball, front_rim;
+    var hoop, left_rim, right_rim, ball, front_rim, field_background;
     var current_score = 0, current_score_text, high_score = 0, current_best_text, current_best_score_text;
     var score_sound, backboard, whoosh, fail, spawn;
     var moveInTween, fadeInTween, moveOutTween, fadeOutTween, emoji, emojiName;
@@ -212,7 +222,23 @@
       fail = game.add.audio('fail'); fail.volume = 0.1;
       spawn = game.add.audio('spawn');
 
+      // Imposta il colore di sfondo verde dello stage di Phaser
       game.stage.backgroundColor = "#005832";
+
+      // --- Modifiche qui per posizionare l'immagine in basso ---
+      field_background = game.add.sprite(game.world.centerX, game.world.height - 70, 'field'); // Posiziona al centro X, in basso Y
+      field_background.anchor.setTo(0.5, 1); // Ancoraggio al centro X, in fondo Y dello sprite
+
+      // Calcola il fattore di scala per adattare l'immagine senza stiramenti (comportamento 'contain')
+      // Il calcolo dello scale rimane lo stesso per mantenere le proporzioni
+      var scaleX = game.world.width / field_background.width;
+      var scaleY = game.world.height / field_background.height;
+      var scale = Math.min(scaleX, scaleY); // Prendi il valore minimo per "contenere"
+
+      field_background.scale.setTo(scale); // Applica la scala calcolata
+      field_background.sendToBack(); // Assicurati che sia dietro gli altri elementi del gioco
+      // --- Fine modifiche ---
+
 
       hoop = game.add.sprite(gameWidth / 2, gameHeight * 0.05, 'hoop');
       hoop.anchor.setTo(0.5, 0);
