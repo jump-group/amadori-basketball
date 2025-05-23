@@ -6,18 +6,42 @@
   <title>Amadori Basketball</title>
   <script src="js/phaser.min.js"></script>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
   <style>
   body {
     margin: 0px;
     overflow: hidden; /* Prevent scrollbars */
+    display: flex; /* Use flexbox for centering content */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    min-height: 100vh; /* Ensure body takes full viewport height */
+    background-color: #333; /* Dark background for body to see contrast */
+  }
+  .game-container {
+    /* Existing styles for the game container */
+  }
+  .footer-text {
+    font-family: "Barlow", sans-serif;
+    font-size: 24px;
+    color: #FFF; /* White color for better visibility */
+    text-align: center;
+    position: fixed;
+    bottom: 10px; /* This will keep it at the very bottom */
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure it's above the canvas if overlapping */
+    pointer-events: none; /* Allow clicks to pass through to the game */
   }
   </style>
 </head>
 <body>
   <div class="GameContainer" id="game-container"></div>
-
+  <span class="footer-text">Trascina rapidamente la palla per lanciarla nel canestro!</span>
   <script>
-    // Define your desired game dimensions (e.g., a standard mobile aspect ratio)
     var gameWidth = 810;
     var gameHeight = 1080;
 
@@ -78,8 +102,7 @@
 
       game.stage.backgroundColor = "#005832";
 
-      // Adjusted hoop position to be higher
-      hoop = game.add.sprite(gameWidth / 2, gameHeight * 0.1, 'hoop'); // Moved hoop higher (10% from top)
+      hoop = game.add.sprite(gameWidth / 2, gameHeight * 0.05, 'hoop');
       hoop.anchor.setTo(0.5, 0);
       hoop.scale.setTo(scaleFactor, scaleFactor);
 
@@ -108,7 +131,9 @@
       current_best_text = game.add.text(gameWidth / 2, hoop.y + (200 * scaleFactor), '', { font: 'Arial', fontSize: (20 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
       current_best_text.anchor.setTo(0.5, 0.5);
 
-      current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#00e6e6', align: 'center' });
+      // --- CAMBIO COLORE QUI (da azzurro a bianco) ---
+      current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#FFF', align: 'center' }); // Modificato da '#00e6e6' a '#FFF'
+      // -----------------------------------------------
       current_best_score_text.anchor.setTo(0.5, 0.5);
 
       createBall();
@@ -132,7 +157,6 @@
         ball.body.collides([collisionGroup], hitRim, this);
       }
 
-      // Adjusted scoring threshold to match new hoop position
       if (ball && ball.body.velocity.y > 0 && ball.body.y > (hoop.y + hoop.height * 0.75) && !ball.isBelowHoop) {
         ball.isBelowHoop = true;
         ball.body.collideWorldBounds = false;
@@ -150,6 +174,8 @@
           current_score = 0;
           current_score_text.text = '';
           current_best_text.text = 'RECORD';
+          // Il testo del record sarà già bianco per impostazione predefinita
+          // grazie alla modifica fatta in create(). Non è necessario impostarlo qui nuovamente.
           current_best_score_text.text = high_score;
         }
         emoji = game.add.sprite(gameWidth / 2, gameHeight * 0.25, emojiName);
@@ -182,7 +208,7 @@
     function createBall() {
       var xpos = (current_score === 0) ? gameWidth / 2 : gameWidth * 0.2 + Math.random() * (gameWidth * 0.6);
       spawn.play();
-      ball = game.add.sprite(xpos, gameHeight * 0.75, 'ball');
+      ball = game.add.sprite(xpos, gameHeight * 0.82, 'ball');
       ball.anchor.setTo(0.5, 0.5);
       game.add.tween(ball.scale).from({ x: 0.7 * scaleFactor, y: 0.7 * scaleFactor }, 100, Phaser.Easing.Linear.None, true);
       game.physics.p2.enable(ball, false);
