@@ -6,12 +6,17 @@
   <title>Amadori Basketball</title>
   <script src="js/phaser.min.js"></script>
   <link rel="stylesheet" href="style.css">
+  <style>
+  body {
+    margin: 0px;
+  }
+  </style>
 </head>
 <body>
   <div class="GameContainer" id="game-container"></div>
 
   <script>
-    var game = new Phaser.Game(400, 625, Phaser.CANVAS, 'game-container', {
+    var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS, 'game-container', {
       preload: preload,
       create: create,
       update: update
@@ -43,7 +48,7 @@
     var isDown = false, start_location, end_location, location_interval;
 
     function create() {
-      game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+      game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
       game.scale.pageAlignHorizontally = true;
       game.scale.pageAlignVertically = true;
       game.scale.refresh();
@@ -63,7 +68,7 @@
       fail = game.add.audio('fail'); fail.volume = 0.1;
       spawn = game.add.audio('spawn');
 
-      game.stage.backgroundColor = "#ffffff";
+      game.stage.backgroundColor = "#005832";
 
       current_score_text = game.add.text(187, 312, '', { font: 'Arial', fontSize: '40px', fill: '#000', align: 'center' });
       current_best_text = game.add.text(143, 281, '', { font: 'Arial', fontSize: '20px', fill: '#000', align: 'center' });
@@ -110,7 +115,7 @@
           if (current_score > high_score) high_score = current_score;
           current_score = 0;
           current_score_text.text = '';
-          current_best_text.text = 'Current Best';
+          current_best_text.text = 'Record';
           current_best_score_text.text = high_score;
         }
         emoji = game.add.sprite(180, 100, emojiName);
