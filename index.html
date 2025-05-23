@@ -19,27 +19,34 @@
     justify-content: center; /* Center vertically */
     align-items: center; /* Center horizontally */
     min-height: 100vh; /* Ensure body takes full viewport height */
-    background-color: #333; /* Dark background for body to see contrast */
+    background-color: #005832; /* Dark background for body to see contrast */
     font-family: "Barlow", sans-serif;
   }
 
   /* Style for the introduction screen */
   #intro-screen {
     position: fixed; /* Fixed position to cover the entire viewport */
+    width: 100%;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #005832; /* Same as game background or a contrasting color */
+    background-color: #005832; /* Colore di sfondo verde */
+    background-image: url('assets/images/webspace_bg.png'); /* Immagine di sfondo */
+    background-size: contain; /* Copre l'intera area */
+    background-position: bottom; /* Centra l'immagine */
+    background-repeat: no-repeat; /* Non ripetere l'immagine */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     z-index: 9999; /* High z-index to be on top of everything */
     color: #FFF; /* Text color */
     font-family: "Barlow", sans-serif;
     text-align: center;
     transition: opacity 1s ease-out; /* Smooth fade out effect */
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
   }
 
   #intro-screen.fade-out {
@@ -49,8 +56,9 @@
 
   #intro-screen img {
     max-width: 80%; /* Adjust size of your logo */
+    width: 50%;
     height: auto;
-    margin-bottom: 30px; /* Space between logo and text */
+    margin-top: 4rem;
   }
 
   #intro-screen h1 {
@@ -62,16 +70,50 @@
     font-size: 1.5em; /* Adjust font size for body text */
     line-height: 1.5;
     max-width: 80%;
+    margin: 0;
   }
 
   #intro-screen .subtitle {
     font-size: 40px;
     font-weight: 700;
     line-height: normal;
+    margin: 0;
   }
 
   #intro-screen .subtitle span {
     color: #FFC511;
+  }
+
+  #intro-screen .textContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+
+  }
+
+  #intro-screen .description {
+    font-size: 32px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  #intro-screen button {
+    background-color: white; /* Button background color */
+    color: #005832; /* Button text color */
+    font-size: 2em;
+    padding: 16px 64px;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+  }
+
+  #intro-screen button:hover {
+    background-color: #e0b000; /* Darker yellow on hover */
   }
 
   .footer-text {
@@ -85,19 +127,27 @@
     z-index: 1000;
     pointer-events: none;
   }
+
+  .logo-game-screen {
+    position: fixed;
+    top: 20px;
+  }
   </style>
 </head>
 <body>
   <div id="intro-screen">
     <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
     <h1>Benvenut*!</h1>
-    <p class="subtitle">Pront* per il <br> <span>Basket Corner</span> di Amadori? 🏀</p>
-    <p>Metti alla prova la tua abilità! <br>
-Tira, segna e scala la classifica:  <br>
-più punti fai, più diventerai un PRO!</p>
-    <p style="font-size: 1.2em; margin-top: 20px;">Tocca per iniziare</p>
+    <div class="textContainer">
+        <p class="subtitle">Pront* per il <br> <span>Basket Corner</span> di Amadori? 🏀</p>
+        <p class="description">Metti alla prova la tua abilità! <br> Tira, segna e scala la classifica:  <br> più punti fai, più diventerai un PRO!</p>
+    </div>
+    <button id="startButton">Gioca ora</button>
   </div>
-
+  
+  <div class="logo-game-screen">
+    <img  src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+  </div>
   <div class="GameContainer" id="game-container"></div>
   <span class="footer-text">Trascina rapidamente la palla per lanciarla nel canestro!</span>
 
@@ -111,13 +161,9 @@ più punti fai, più diventerai un PRO!</p>
       update: update
     });
 
-    // Variabile per tenere traccia se l'introduzione è stata mostrata
-    var introShown = false;
+    var introShown = false; // Variabile per tenere traccia se l'introduzione è stata mostrata
 
     function preload() {
-      // Carica il logo dell'introduzione se non è già caricato
-      // Se il logo è già caricato tramite <img> nel HTML, non è strettamente necessario ricaricarlo qui per il JS
-      // game.load.image('intro_logo', 'assets/images/logo_amadori.png'); // Esempio se volessi gestirlo via Phaser
       game.load.image('ball', 'assets/images/ball.png');
       game.load.image('hoop', 'assets/images/hoop.png');
       game.load.image('side rim', 'assets/images/side_rim.png');
@@ -202,15 +248,12 @@ più punti fai, più diventerai un PRO!</p>
 
       createBall();
 
-      // Non abilitare gli input del gioco finché l'intro non è scomparsa
-      // game.input.onDown.add(click, this); // Non abilitarlo qui
-      // game.input.onUp.add(release, this); // Non abilitarlo qui
-
       // Gestione della pagina introduttiva
       var introScreen = document.getElementById('intro-screen');
+      var startButton = document.getElementById('startButton'); // Ottieni il riferimento al pulsante
 
-      // Aggiungi un listener per nascondere l'intro quando l'utente tocca/clicca
-      introScreen.addEventListener('click', function() {
+      // Aggiungi un listener solo al pulsante
+      startButton.addEventListener('click', function() {
           if (!introShown) {
               introScreen.classList.add('fade-out'); // Avvia la transizione CSS
               // Rimuovi lo schermo intro dopo la transizione (1 secondo)
@@ -260,7 +303,7 @@ più punti fai, più diventerai un PRO!</p>
                 if (current_score > high_score) high_score = current_score;
                 current_score = 0;
                 current_score_text.text = '';
-                current_best_text.text = 'RECORD';
+                current_best_text.text = 'Il tuo record';
                 current_best_score_text.text = high_score;
             }
             emoji = game.add.sprite(gameWidth / 2, gameHeight * 0.25, emojiName);
