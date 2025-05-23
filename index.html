@@ -7,8 +7,8 @@
   <script src="js/phaser.min.js"></script>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
   <style>
   body {
@@ -20,27 +20,87 @@
     align-items: center; /* Center horizontally */
     min-height: 100vh; /* Ensure body takes full viewport height */
     background-color: #333; /* Dark background for body to see contrast */
-  }
-  .game-container {
-    /* Existing styles for the game container */
-  }
-  .footer-text {
     font-family: "Barlow", sans-serif;
+  }
+
+  /* Style for the introduction screen */
+  #intro-screen {
+    position: fixed; /* Fixed position to cover the entire viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #005832; /* Same as game background or a contrasting color */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* High z-index to be on top of everything */
+    color: #FFF; /* Text color */
+    font-family: "Barlow", sans-serif;
+    text-align: center;
+    transition: opacity 1s ease-out; /* Smooth fade out effect */
+  }
+
+  #intro-screen.fade-out {
+    opacity: 0;
+    visibility: hidden; /* Hide element after fading out */
+  }
+
+  #intro-screen img {
+    max-width: 80%; /* Adjust size of your logo */
+    height: auto;
+    margin-bottom: 30px; /* Space between logo and text */
+  }
+
+  #intro-screen h1 {
+    font-size: 3.5em; /* Adjust font size for title */
+    margin-bottom: 20px;
+  }
+
+  #intro-screen p {
+    font-size: 1.5em; /* Adjust font size for body text */
+    line-height: 1.5;
+    max-width: 80%;
+  }
+
+  #intro-screen .subtitle {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: normal;
+  }
+
+  #intro-screen .subtitle span {
+    color: #FFC511;
+  }
+
+  .footer-text {
     font-size: 24px;
     color: #FFF; /* White color for better visibility */
     text-align: center;
     position: fixed;
-    bottom: 10px; /* This will keep it at the very bottom */
+    bottom: 20px;
     left: 0;
     right: 0;
-    z-index: 1000; /* Ensure it's above the canvas if overlapping */
-    pointer-events: none; /* Allow clicks to pass through to the game */
+    z-index: 1000;
+    pointer-events: none;
   }
   </style>
 </head>
 <body>
+  <div id="intro-screen">
+    <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+    <h1>Benvenut*!</h1>
+    <p class="subtitle">Pront* per il <br> <span>Basket Corner</span> di Amadori? 🏀</p>
+    <p>Metti alla prova la tua abilità! <br>
+Tira, segna e scala la classifica:  <br>
+più punti fai, più diventerai un PRO!</p>
+    <p style="font-size: 1.2em; margin-top: 20px;">Tocca per iniziare</p>
+  </div>
+
   <div class="GameContainer" id="game-container"></div>
   <span class="footer-text">Trascina rapidamente la palla per lanciarla nel canestro!</span>
+
   <script>
     var gameWidth = 810;
     var gameHeight = 1080;
@@ -51,7 +111,13 @@
       update: update
     });
 
+    // Variabile per tenere traccia se l'introduzione è stata mostrata
+    var introShown = false;
+
     function preload() {
+      // Carica il logo dell'introduzione se non è già caricato
+      // Se il logo è già caricato tramite <img> nel HTML, non è strettamente necessario ricaricarlo qui per il JS
+      // game.load.image('intro_logo', 'assets/images/logo_amadori.png'); // Esempio se volessi gestirlo via Phaser
       game.load.image('ball', 'assets/images/ball.png');
       game.load.image('hoop', 'assets/images/hoop.png');
       game.load.image('side rim', 'assets/images/side_rim.png');
@@ -131,66 +197,85 @@
       current_best_text = game.add.text(gameWidth / 2, hoop.y + (200 * scaleFactor), '', { font: 'Arial', fontSize: (20 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
       current_best_text.anchor.setTo(0.5, 0.5);
 
-      // --- CAMBIO COLORE QUI (da azzurro a bianco) ---
-      current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#FFF', align: 'center' }); // Modificato da '#00e6e6' a '#FFF'
-      // -----------------------------------------------
+      current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
       current_best_score_text.anchor.setTo(0.5, 0.5);
 
       createBall();
 
-      cursors = game.input.keyboard.createCursorKeys();
-      game.input.onDown.add(click, this);
-      game.input.onUp.add(release, this);
+      // Non abilitare gli input del gioco finché l'intro non è scomparsa
+      // game.input.onDown.add(click, this); // Non abilitarlo qui
+      // game.input.onUp.add(release, this); // Non abilitarlo qui
+
+      // Gestione della pagina introduttiva
+      var introScreen = document.getElementById('intro-screen');
+
+      // Aggiungi un listener per nascondere l'intro quando l'utente tocca/clicca
+      introScreen.addEventListener('click', function() {
+          if (!introShown) {
+              introScreen.classList.add('fade-out'); // Avvia la transizione CSS
+              // Rimuovi lo schermo intro dopo la transizione (1 secondo)
+              setTimeout(function() {
+                  introScreen.style.display = 'none';
+                  introShown = true;
+                  // Ora che l'intro è andata, abilita gli input del gioco
+                  game.input.onDown.add(click, this);
+                  game.input.onUp.add(release, this);
+              }.bind(this), 1000); // 1000ms = 1s, deve corrispondere alla durata della transizione CSS
+          }
+      }.bind(this)); // Bind 'this' per mantenere il contesto di Phaser
     }
 
     function update() {
-      if (ball && ball.body.velocity.y > 0 && !front_rim) {
-        front_rim = game.add.sprite(hoop.x - (52 * scaleFactor), hoop.y + (120 * scaleFactor), 'front rim');
-        front_rim.scale.setTo(scaleFactor, scaleFactor);
-      }
-      if (ball && ball.body.velocity.y < 0 && front_rim) {
-        front_rim.destroy();
-        front_rim = null;
-      }
-
-      if (ball && ball.body.velocity.y > 0) {
-        ball.body.collides([collisionGroup], hitRim, this);
-      }
-
-      if (ball && ball.body.velocity.y > 0 && ball.body.y > (hoop.y + hoop.height * 0.75) && !ball.isBelowHoop) {
-        ball.isBelowHoop = true;
-        ball.body.collideWorldBounds = false;
-
-        var rand = Math.floor(Math.random() * 5);
-        if (ball.body.x > left_rim.x && ball.body.x < right_rim.x) {
-          emojiName = "win" + rand;
-          current_score += 1;
-          current_score_text.text = current_score;
-          score_sound.play();
-        } else {
-          emojiName = "lose" + rand;
-          fail.play();
-          if (current_score > high_score) high_score = current_score;
-          current_score = 0;
-          current_score_text.text = '';
-          current_best_text.text = 'RECORD';
-          // Il testo del record sarà già bianco per impostazione predefinita
-          // grazie alla modifica fatta in create(). Non è necessario impostarlo qui nuovamente.
-          current_best_score_text.text = high_score;
+        // Solo aggiorna la logica del gioco se l'introduzione è stata mostrata
+        if (!introShown) {
+            return; // Esci dalla funzione update se l'intro è ancora attiva
         }
-        emoji = game.add.sprite(gameWidth / 2, gameHeight * 0.25, emojiName);
-        emoji.anchor.setTo(0.5, 0.5);
-        emoji.scale.setTo(0.25 * scaleFactor, 0.25 * scaleFactor);
-        moveInTween = game.add.tween(emoji).from({ y: emoji.y + (50 * scaleFactor) }, 500, Phaser.Easing.Elastic.Out, true);
-        fadeInTween = game.add.tween(emoji).from({ alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-        moveInTween.onComplete.add(tweenOut, this);
-      }
 
-      if (ball && ball.body.y > gameHeight + (100 * scaleFactor)) {
-        game.physics.p2.gravity.y = 0;
-        ball.kill();
-        createBall();
-      }
+        if (ball && ball.body.velocity.y > 0 && !front_rim) {
+            front_rim = game.add.sprite(hoop.x - (52 * scaleFactor), hoop.y + (120 * scaleFactor), 'front rim');
+            front_rim.scale.setTo(scaleFactor, scaleFactor);
+        }
+        if (ball && ball.body.velocity.y < 0 && front_rim) {
+            front_rim.destroy();
+            front_rim = null;
+        }
+
+        if (ball && ball.body.velocity.y > 0) {
+            ball.body.collides([collisionGroup], hitRim, this);
+        }
+
+        if (ball && ball.body.velocity.y > 0 && ball.body.y > (hoop.y + hoop.height * 0.75) && !ball.isBelowHoop) {
+            ball.isBelowHoop = true;
+            ball.body.collideWorldBounds = false;
+
+            var rand = Math.floor(Math.random() * 5);
+            if (ball.body.x > left_rim.x && ball.body.x < right_rim.x) {
+                emojiName = "win" + rand;
+                current_score += 1;
+                current_score_text.text = current_score;
+                score_sound.play();
+            } else {
+                emojiName = "lose" + rand;
+                fail.play();
+                if (current_score > high_score) high_score = current_score;
+                current_score = 0;
+                current_score_text.text = '';
+                current_best_text.text = 'RECORD';
+                current_best_score_text.text = high_score;
+            }
+            emoji = game.add.sprite(gameWidth / 2, gameHeight * 0.25, emojiName);
+            emoji.anchor.setTo(0.5, 0.5);
+            emoji.scale.setTo(0.25 * scaleFactor, 0.25 * scaleFactor);
+            moveInTween = game.add.tween(emoji).from({ y: emoji.y + (50 * scaleFactor) }, 500, Phaser.Easing.Elastic.Out, true);
+            fadeInTween = game.add.tween(emoji).from({ alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
+            moveInTween.onComplete.add(tweenOut, this);
+        }
+
+        if (ball && ball.body.y > gameHeight + (100 * scaleFactor)) {
+            game.physics.p2.gravity.y = 0;
+            ball.kill();
+            createBall();
+        }
     }
 
     function tweenOut() {
