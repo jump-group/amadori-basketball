@@ -284,7 +284,7 @@
       current_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '0', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
       current_score_text.anchor.setTo(0.5, 0.5);
 
-      current_best_text = game.add.text(gameWidth / 2, hoop.y + (200 * scaleFactor), '', { font: 'Arial', fontSize: (20 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
+      current_best_text = game.add.text(gameWidth / 2, hoop.y + (220 * scaleFactor), '', { font: 'Arial', fontSize: '36px', fill: '#FFF', align: 'center' });
       current_best_text.anchor.setTo(0.5, 0.5);
 
       current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
@@ -365,7 +365,7 @@
                 current_best_score_text.text = high_score;
                 high_score_bg.alpha = 1; // Mostra lo sfondo del record
             }
-            emoji = game.add.sprite(gameWidth / 2, gameHeight * 0.25, emojiName);
+            emoji = game.add.sprite(gameWidth / 2, hoop.y + (70 * scaleFactor), emojiName);
             emoji.anchor.setTo(0.5, 0.5);
             emoji.scale.setTo(0.25 * scaleFactor, 0.25 * scaleFactor);
             moveInTween = game.add.tween(emoji).from({ y: emoji.y + (50 * scaleFactor) }, 500, Phaser.Easing.Elastic.Out, true);
