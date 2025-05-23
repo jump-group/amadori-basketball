@@ -39,7 +39,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Centra verticalmente il contenuto dell'intro screen */
+  
     z-index: 9999; /* High z-index to be on top of everything */
     color: #FFF; /* Text color */
     font-family: "Barlow", sans-serif;
@@ -198,6 +198,10 @@
     var collisionGroup;
     var isDown = false, start_location, end_location, location_interval;
 
+    // Aggiungi queste variabili per gli sfondi del testo
+    var current_score_bg; // Sfondo per il punteggio corrente
+    var high_score_bg;    // Sfondo per il record
+
     var scaleFactor = 2;
 
     function create() {
@@ -225,20 +229,15 @@
       // Imposta il colore di sfondo verde dello stage di Phaser
       game.stage.backgroundColor = "#005832";
 
-      // --- Modifiche qui per posizionare l'immagine in basso ---
-      field_background = game.add.sprite(game.world.centerX, game.world.height - 70, 'field'); // Posiziona al centro X, in basso Y
-      field_background.anchor.setTo(0.5, 1); // Ancoraggio al centro X, in fondo Y dello sprite
+      field_background = game.add.sprite(game.world.centerX, game.world.height - 70, 'field');
+      field_background.anchor.setTo(0.5, 1);
 
-      // Calcola il fattore di scala per adattare l'immagine senza stiramenti (comportamento 'contain')
-      // Il calcolo dello scale rimane lo stesso per mantenere le proporzioni
       var scaleX = game.world.width / field_background.width;
       var scaleY = game.world.height / field_background.height;
-      var scale = Math.min(scaleX, scaleY); // Prendi il valore minimo per "contenere"
+      var scale = Math.min(scaleX, scaleY);
 
-      field_background.scale.setTo(scale); // Applica la scala calcolata
-      field_background.sendToBack(); // Assicurati che sia dietro gli altri elementi del gioco
-      // --- Fine modifiche ---
-
+      field_background.scale.setTo(scale);
+      field_background.sendToBack();
 
       hoop = game.add.sprite(gameWidth / 2, gameHeight * 0.05, 'hoop');
       hoop.anchor.setTo(0.5, 0);
@@ -263,14 +262,42 @@
       left_rim.body.collides([collisionGroup]);
       right_rim.body.collides([collisionGroup]);
 
-      current_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '0', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
+      // --- Aggiungi qui gli sfondi per il punteggio e il record ---
+
+      // Sfondo per il punteggio corrente
+      current_score_bg = game.add.graphics(0, 0);
+      current_score_bg.beginFill(0x8bc34a, 0.8); // Verde chiaro (Lime 500) con opacità
+      current_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60); // Posizione e dimensione
+      current_score_bg.endFill();
+      current_score_bg.alpha = 0; // Inizia nascosto, verrà mostrato quando il punteggio è 0
+
+      // Sfondo per il record (high score)
+      high_score_bg = game.add.graphics(0, 0);
+      high_score_bg.beginFill(0x8bc34a, 0.8); // Verde chiaro (Lime 500) con opacità
+      high_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60); // Posizione e dimensione
+      high_score_bg.endFill();
+      high_score_bg.alpha = 0; // Inizia nascosto, verrà mostrato quando c'è un record
+
+      // --- Fine aggiunta sfondi ---
+
+
+      current_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '0', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
       current_score_text.anchor.setTo(0.5, 0.5);
 
       current_best_text = game.add.text(gameWidth / 2, hoop.y + (200 * scaleFactor), '', { font: 'Arial', fontSize: (20 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
       current_best_text.anchor.setTo(0.5, 0.5);
 
-      current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: (40 * scaleFactor) + 'px', fill: '#FFF', align: 'center' });
+      current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
       current_best_score_text.anchor.setTo(0.5, 0.5);
+
+      // Posiziona il testo sopra il suo sfondo
+      current_score_bg.bringToBack = false; // Non è una funzione, ma un'idea. useremo setChildIndex
+      game.world.bringToTop(current_score_bg); // Assicurati che lo sfondo sia sopra il field
+      game.world.bringToTop(high_score_bg); // Assicurati che lo sfondo sia sopra il field
+      game.world.bringToTop(current_score_text); // Metti il testo sopra il suo sfondo
+      game.world.bringToTop(current_best_text);
+      game.world.bringToTop(current_best_score_text);
+
 
       createBall();
 
@@ -323,14 +350,20 @@
                 current_score += 1;
                 current_score_text.text = current_score;
                 score_sound.play();
+                // Mostra il background del punteggio corrente
+                current_score_bg.alpha = 1; // Rende visibile lo sfondo
+                high_score_bg.alpha = 0; // Nasconde lo sfondo del record
             } else {
                 emojiName = "lose" + rand;
                 fail.play();
                 if (current_score > high_score) high_score = current_score;
                 current_score = 0;
-                current_score_text.text = '';
+                current_score_text.text = ''; // Il punteggio corrente sparisce
+                current_score_bg.alpha = 0; // Nasconde lo sfondo del punteggio corrente
+
                 current_best_text.text = 'Il tuo record';
                 current_best_score_text.text = high_score;
+                high_score_bg.alpha = 1; // Mostra lo sfondo del record
             }
             emoji = game.add.sprite(gameWidth / 2, gameHeight * 0.25, emojiName);
             emoji.anchor.setTo(0.5, 0.5);
@@ -369,6 +402,13 @@
       ball.body.setCircle(60 * scaleFactor * 0.6);
       ball.launched = false;
       ball.isBelowHoop = false;
+
+      // Al reset della palla, mostriamo il punteggio corrente e nascondiamo il record
+      current_score_text.text = current_score;
+      current_score_bg.alpha = 1;
+      current_best_text.text = '';
+      current_best_score_text.text = '';
+      high_score_bg.alpha = 0;
     }
 
     function click(pointer) {
@@ -399,8 +439,14 @@
       if (!ball.launched) {
         ball.body.setCircle(36 * scaleFactor * 0.6);
         ball.body.setCollisionGroup(collisionGroup);
-        current_best_text.text = '';
+        // Nascondi tutti i background del testo durante il lancio
+        current_score_bg.alpha = 0;
+        high_score_bg.alpha = 0;
+
+        current_best_text.text = ''; // Nascondi anche i testi del record
         current_best_score_text.text = '';
+
+
         ball.launched = true;
         game.physics.p2.gravity.y = 3000 * scaleFactor;
         game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
