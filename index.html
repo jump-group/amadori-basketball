@@ -140,9 +140,104 @@
       width: 100%;
       height: auto;
   }
+
+  /* Style for the Game Over screen */
+  #game-over-screen {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #005832; /* Colore di sfondo verde */
+    background-image: url('assets/images/webspace_bg.png'); /* Immagine di sfondo */
+    background-size: contain;
+    background-position: bottom;
+    background-repeat: no-repeat;
+    display: flex; /* Inizia nascosto, verrà mostrato da JS */
+    flex-direction: column;
+    align-items: center;
+    z-index: 9998; /* Un po' meno di intro-screen, ma comunque alto */
+    color: #FFF;
+    font-family: "Barlow", sans-serif;
+    text-align: center;
+    gap: 2rem;
+    /* Aggiungi queste per nasconderlo inizialmente */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1s ease-out; /* Per un effetto fade-in/out */
+  }
+
+  #game-over-screen.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #game-over-screen img {
+    max-width: 80%;
+    width: 50%;
+    height: auto;
+    margin-top: 4rem;
+  }
+
+  #game-over-screen h1 {
+    font-size: 3.5em;
+    margin-bottom: 20px;
+  }
+
+  #game-over-screen .subtitle {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: normal;
+    margin: 0;
+  }
+
+  #game-over-screen .subtitle span {
+    color: #FFC511;
+  }
+
+  #game-over-screen .textContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  #game-over-screen .description {
+    font-size: 32px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  #game-over-screen button {
+    background-color: white;
+    color: #005832;
+    font-size: 2em;
+    padding: 16px 64px;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+  }
+
+  #game-over-screen button:hover {
+    background-color: #e0b000;
+  }
   </style>
 </head>
 <body>
+  <div id="game-over-screen">
+    <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+    <h1>Tempo Scaduto!</h1>
+    <div class="textContainer">
+        <p class="subtitle">Hai totalizzato <br> <span id="final-score">0</span> punti!</p>
+    </div>
+    <button id="restartButton">Gioca ancora</button>
+  </div>
+
   <div id="intro-screen">
     <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
     <h1>Benvenut*!</h1>
@@ -170,6 +265,11 @@
     });
 
     var introShown = false; // Variabile per tenere traccia se l'introduzione è stata mostrata
+    var totalShots = 0;     // Contatore dei tiri
+    var maxShots = 5;      // Numero massimo di tiri consentiti
+    var gameOverScreen;     // Riferimento al div della schermata di game over
+    var finalScoreText;     // Riferimento allo span del punteggio finale
+    var restartButton;      // Riferimento al pulsante di riavvio
 
     function preload() {
       game.load.image('field', 'assets/images/field.png');
@@ -304,6 +404,12 @@
       // Gestione della pagina introduttiva
       var introScreen = document.getElementById('intro-screen');
       var startButton = document.getElementById('startButton'); // Ottieni il riferimento al pulsante
+       // Recupera i riferimenti per la schermata di Game Over
+      gameOverScreen = document.getElementById('game-over-screen');
+      finalScoreText = document.getElementById('final-score');
+      restartButton = document.getElementById('restartButton');
+
+       restartButton.addEventListener('click', restartGame);
 
       // Aggiungi un listener solo al pulsante
       startButton.addEventListener('click', function() {
@@ -319,6 +425,29 @@
               }.bind(this), 1000); // 1000ms = 1s, deve corrispondere alla durata della transizione CSS
           }
       }.bind(this)); // Bind 'this' per mantenere il contesto di Phaser
+    }
+
+    function restartGame() {
+        // Nascondi la schermata di Game Over
+        gameOverScreen.classList.remove('show');
+
+        // Resetta lo stato del gioco
+        totalShots = 0;
+        current_score = 0; // Resetta il punteggio corrente
+        // high_score non viene resettato, rimane il record (se vuoi resettarlo, fallo qui)
+
+        // Reset della palla e dell'interfaccia utente come all'inizio di un nuovo gioco
+        createBall();
+        current_score_text.text = current_score; // Imposta a 0
+        current_score_text.alpha = 1;
+        current_score_bg.alpha = 1;
+        current_best_text.alpha = 0;
+        current_best_score_text.alpha = 0;
+        high_score_bg.alpha = 0;
+
+        // Assicurati che l'input del gioco sia abilitato
+        game.input.onDown.add(click, this);
+        game.input.onUp.add(release, this);
     }
 
     function update() {
@@ -350,20 +479,28 @@
                 current_score += 1;
                 current_score_text.text = current_score;
                 score_sound.play();
-                // Mostra il background del punteggio corrente
-                current_score_bg.alpha = 1; // Rende visibile lo sfondo
-                high_score_bg.alpha = 0; // Nasconde lo sfondo del record
+// In caso di canestro, il punteggio corrente rimane visibile, il record è nascosto
+                current_score_bg.alpha = 1;
+                current_score_text.alpha = 1;
+
+                high_score_bg.alpha = 0;
+                current_best_text.alpha = 0;
+                current_best_score_text.alpha = 0;
             } else {
                 emojiName = "lose" + rand;
                 fail.play();
                 if (current_score > high_score) high_score = current_score;
-                current_score = 0;
-                current_score_text.text = ''; // Il punteggio corrente sparisce
-                current_score_bg.alpha = 0; // Nasconde lo sfondo del punteggio corrente
+                 current_score = 0; // Reset del punteggio corrente
+
+                // In caso di errore, nascondi il punteggio corrente e mostra il record
+                current_score_text.alpha = 0; // Nascondi il testo del punteggio corrente
+                current_score_bg.alpha = 0;   // Nascondi il suo sfondo
 
                 current_best_text.text = 'Il tuo record';
                 current_best_score_text.text = high_score;
                 high_score_bg.alpha = 1; // Mostra lo sfondo del record
+                current_best_text.alpha = 1; // Mostra il testo "Il tuo record"
+                current_best_score_text.alpha = 1; // Mostra il numero del record
             }
             emoji = game.add.sprite(gameWidth / 2, hoop.y + (70 * scaleFactor), emojiName);
             emoji.anchor.setTo(0.5, 0.5);
@@ -373,10 +510,18 @@
             moveInTween.onComplete.add(tweenOut, this);
         }
 
+        // Se la palla è uscita dallo schermo
         if (ball && ball.body.y > gameHeight + (100 * scaleFactor)) {
-            game.physics.p2.gravity.y = 0;
-            ball.kill();
-            createBall();
+            game.physics.p2.gravity.y = 0; // Ferma la gravità
+            ball.kill(); // Uccidi lo sprite della palla
+            ball = null; // Rimuovi il riferimento alla palla
+
+            // Controlla il numero di tiri DOPO che la palla è uscita dallo schermo
+            if (totalShots >= maxShots) {
+                endGame(); // Termina il gioco se abbiamo esaurito i tiri
+            } else {
+                createBall(); // Altrimenti, crea una nuova palla per il prossimo tiro
+            }
         }
     }
 
@@ -405,9 +550,11 @@
 
       // Al reset della palla, mostriamo il punteggio corrente e nascondiamo il record
       current_score_text.text = current_score;
+      current_score_text.alpha = 1;
       current_score_bg.alpha = 1;
-      current_best_text.text = '';
-      current_best_score_text.text = '';
+
+current_best_text.alpha = 0;
+      current_best_score_text.alpha = 0;
       high_score_bg.alpha = 0;
     }
 
@@ -437,15 +584,17 @@
 
     function launch(x_traj) {
       if (!ball.launched) {
-        ball.body.setCircle(36 * scaleFactor * 0.6);
+       ball.body.setCircle(36 * scaleFactor * 0.6);
         ball.body.setCollisionGroup(collisionGroup);
-        // Nascondi tutti i background del testo durante il lancio
-        current_score_bg.alpha = 0;
+
+        // Nascondi il record quando si lancia la palla
         high_score_bg.alpha = 0;
+        current_best_text.alpha = 0;
+        current_best_score_text.alpha = 0;
 
-        current_best_text.text = ''; // Nascondi anche i testi del record
-        current_best_score_text.text = '';
-
+        // Assicurati che il punteggio corrente sia visibile (se non lo è già)
+        current_score_bg.alpha = 1;
+        current_score_text.alpha = 1;
 
         ball.launched = true;
         game.physics.p2.gravity.y = 3000 * scaleFactor;
@@ -454,7 +603,34 @@
         ball.body.velocity.y = -1750 * scaleFactor;
         ball.body.rotateRight(x_traj / 3);
         whoosh.play();
+
+        // Incrementa il contatore dei tiri
+        totalShots++;
+        console.log("Tiro numero: " + totalShots); // Per debug
       }
+    }
+
+    function endGame() {
+        // Disabilita gli input del gioco
+        game.input.onDown.removeAll();
+        game.input.onUp.removeAll();
+
+        // Uccidi la palla se è ancora presente
+        if (ball) {
+            ball.kill();
+            ball = null;
+        }
+
+        // Assicurati che tutti i testi del punteggio siano nascosti
+        current_score_text.alpha = 0;
+        current_score_bg.alpha = 0;
+        current_best_text.alpha = 0;
+        current_best_score_text.alpha = 0;
+        high_score_bg.alpha = 0;
+
+        // Mostra il punteggio finale sulla schermata di Game Over
+        finalScoreText.textContent = current_score; // Mostra il punteggio corrente finale
+        gameOverScreen.classList.add('show'); // Mostra la schermata di Game Over
     }
   </script>
 </body>
