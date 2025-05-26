@@ -68,7 +68,7 @@
 
   var introShown = false;
   var totalShots = 0;
-  var maxShots = 20;
+  var maxShots = 3;
   var gameOverScreen;
   var finalScoreText;
   var restartButton;
@@ -78,7 +78,7 @@
 
   var isFirstBall = true; // Variabile per il controllo della prima palla
 
-  /**
+   /**
    * Funzione di pre-caricamento delle risorse di gioco.
    * Viene eseguita prima che il gioco inizi e serve a caricare:
    * 
@@ -239,6 +239,8 @@
           introShown = true;
           game.input.onDown.add(click, this);
           game.input.onUp.add(release, this);
+
+        
         }.bind(this), 1000);
       }
     }.bind(this));
@@ -251,7 +253,7 @@
     currentShotsElement.textContent = totalShots;
   }
 
-  /**
+/**
    * Riavvia il gioco dopo che è terminato (Game Over):
    * - Nasconde la schermata di Game Over.
    * - Reimposta il numero totale di tiri e il punteggio.
@@ -260,22 +262,39 @@
    * - Aggiorna la UI per mostrare il punteggio e il contatore dei tiri.
    * - Riattiva l’ascolto degli input per il tiro.
    */
-  function restartGame() {
-    gameOverScreen.classList.remove('show');
-    totalShots = 0;
-    current_score = 0;
-    isFirstBall = true; // Ripristina la variabile al restart
-    createBall();
-    current_score_text.text = current_score;
-    current_score_text.alpha = 1;
-    current_score_bg.alpha = 1;
-    current_best_text.alpha = 0;
-    current_best_score_text.alpha = 0;
-    high_score_bg.alpha = 0;
-    updateShotsCounter();
-    game.input.onDown.add(click, this);
-    game.input.onUp.add(release, this);
+function restartGame() {
+  gameOverScreen.classList.remove('show');
+
+  var introScreen = document.getElementById('pageIntro');
+  introScreen.style.display = 'flex';
+  introScreen.classList.remove('fade-out');
+
+  totalShots = 0;
+  current_score = 0;
+  isFirstBall = true;
+  introShown = false;
+
+  current_score_text.text = current_score;
+  current_score_text.alpha = 1;
+  current_score_bg.alpha = 1;
+  current_best_text.alpha = 0;
+  current_best_score_text.alpha = 0;
+  high_score_bg.alpha = 0;
+
+  updateShotsCounter();
+
+  // Se c’è già una palla, la distruggiamo prima
+  if (ball) {
+    ball.kill();
+    ball = null;
   }
+
+  // Creiamo subito la palla prima che l’utente premi "gioca"
+  createBall();
+
+  game.input.onDown.remove(click, this);
+  game.input.onUp.remove(release, this);
+}
 
   /**
    * Funzione di aggiornamento chiamata automaticamente ad ogni frame dal motore Phaser.
@@ -329,7 +348,7 @@
         current_score_text.text = current_score;
         score_sound.play();
 
-        var bravoText = game.add.text(gameWidth / 2, hoop.y + (220 * scaleFactor), "Bravo!", {
+        var bravoText = game.add.text(gameWidth / 2, hoop.y + (220 * scaleFactor), "Super!", {
           font: 'bold 36px Arial',
           fill: '#FFD700',
           align: 'center'
@@ -389,6 +408,7 @@
       fadeOutTween = game.add.tween(emoji).to({ alpha: 0 }, 300, Phaser.Easing.Linear.None, true);
     }, 450);
   }
+
 
   /**
    * Funzione chiamata quando la palla colpisce il bordo del canestro (rim).
@@ -461,7 +481,7 @@
     }
   }
 
-  /**
+    /**
    * Funzione chiamata quando l'utente rilascia il tocco o il click.
    * 
    * Se isDown è true (cioè c'era un tocco attivo sulla palla), cancella l'intervallo
