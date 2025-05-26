@@ -58,7 +58,6 @@
     .catch(err => console.error('Errore SW:', err));
 }
 
-
     var gameWidth = 810;
     var gameHeight = 1080;
 
@@ -350,23 +349,35 @@
     }
 
     function createBall() {
-      var xpos = (current_score === 0) ? gameWidth / 2 : gameWidth * 0.2 + Math.random() * (gameWidth * 0.6);
-      spawn.play();
-      ball = game.add.sprite(xpos, gameHeight * 0.82, 'ball');
-      ball.anchor.setTo(0.5, 0.5);
-      game.add.tween(ball.scale).from({ x: 0.7 * scaleFactor, y: 0.7 * scaleFactor }, 100, Phaser.Easing.Linear.None, true);
-      game.physics.p2.enable(ball, false);
-      ball.body.setCircle(60 * scaleFactor * 0.6);
-      ball.launched = false;
-      ball.isBelowHoop = false;
+      
+var xpos = gameWidth / 2;  // o la posizione orizzontale che vuoi
+  var fixedY = gameHeight * 0.82;
 
-      current_score_text.text = current_score;
-      current_score_text.alpha = 1;
-      current_score_bg.alpha = 1;
+  spawn.play();
+  ball = game.add.sprite(xpos, fixedY, 'ball');
+  ball.anchor.setTo(0.5, 0.5);
+  game.add.tween(ball.scale).from({ x: 0.7 * scaleFactor, y: 0.7 * scaleFactor }, 100, Phaser.Easing.Linear.None, true);
+  
+  game.physics.p2.enable(ball, false);
 
-      current_best_text.alpha = 0;
-      current_best_score_text.alpha = 0;
-      high_score_bg.alpha = 0;
+  // Allinea posizione fisica a quella dello sprite
+  ball.body.x = ball.x;
+  ball.body.y = ball.y;
+
+  ball.body.setCircle(60 * scaleFactor * 0.6);
+  ball.launched = false;
+  ball.isBelowHoop = false;
+
+  // Disabilita gravità fino al lancio
+  game.physics.p2.gravity.y = 0;
+
+  current_score_text.text = current_score;
+  current_score_text.alpha = 1;
+  current_score_bg.alpha = 1;
+
+  current_best_text.alpha = 0;
+  current_best_score_text.alpha = 0;
+  high_score_bg.alpha = 0;
     }
 
     function click(pointer) {
@@ -395,33 +406,33 @@
         }
       }
     }
+function launch(x_traj) {
+  if (!ball.launched) {
+    ball.body.setCircle(36 * scaleFactor * 0.6);
+    ball.body.setCollisionGroup(collisionGroup);
 
-    function launch(x_traj) {
-      if (!ball.launched) {
-       ball.body.setCircle(36 * scaleFactor * 0.6);
-        ball.body.setCollisionGroup(collisionGroup);
+    high_score_bg.alpha = 0;
+    current_best_text.alpha = 0;
+    current_best_score_text.alpha = 0;
+    current_score_bg.alpha = 1;
+    current_score_text.alpha = 1;
 
-        high_score_bg.alpha = 0;
-        current_best_text.alpha = 0;
-        current_best_score_text.alpha = 0;
-        current_score_bg.alpha = 1;
-        current_score_text.alpha = 1;
+    ball.launched = true;
 
-        ball.launched = true;
-        game.physics.p2.gravity.y = 2500 * scaleFactor; // Mantengo la gravità a 2500 per evitare che galleggi troppo
-        game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
-        ball.body.velocity.x = x_traj;
-        // Ho modificato questo valore per ridurre la velocità verticale iniziale del tiro.
-        // Un valore più basso (in valore assoluto, dato che è negativo) renderà la palla meno "sparata" verso l'alto.
-        // Era -2000 * scaleFactor, ora è -1500 * scaleFactor.
-        ball.body.velocity.y = -1500 * scaleFactor;
-        ball.body.rotateRight(x_traj / 3);
-        whoosh.play();
+    // Ripristina gravità solo al lancio
+    game.physics.p2.gravity.y = 2500 * scaleFactor;
 
-        totalShots++;
-        updateShotsCounter();
-      }
-    }
+    game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
+    ball.body.velocity.x = x_traj;
+    ball.body.velocity.y = -1500 * scaleFactor;
+    ball.body.rotateRight(x_traj / 3);
+    whoosh.play();
+
+    totalShots++;
+    updateShotsCounter();
+  }
+}
+
 
   function endGame() {
       game.input.onDown.removeAll();
