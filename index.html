@@ -9,268 +9,41 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,100;1,800;1,900&display=swap" rel="stylesheet">
-
-  <style>
-  body {
-    margin: 0px;
-    overflow: hidden; /* Prevent scrollbars */
-    display: flex; /* Use flexbox for centering content */
-    flex-direction: column; /* Stack items vertically */
-    justify-content: center; /* Center vertically */
-    align-items: center; /* Center horizontally */
-    min-height: 100vh; /* Ensure body takes full viewport height */
-    background-color: #005832; /* Dark background for body to see contrast */
-    font-family: "Barlow", sans-serif;
-  }
-
-  /* Style for the introduction screen */
-  #intro-screen {
-    position: fixed; /* Fixed position to cover the entire viewport */
-    width: 100%;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #005832; /* Colore di sfondo verde */
-    background-image: url('assets/images/webspace_bg.png'); /* Immagine di sfondo */
-    background-size: contain; /* Adatta l'immagine mantenendo le proporzioni, potrebbe lasciare spazi vuoti */
-    background-position: bottom; /* Allinea l'immagine al fondo */
-    background-repeat: no-repeat; /* Non ripetere l'immagine */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  
-    z-index: 9999; /* High z-index to be on top of everything */
-    color: #FFF; /* Text color */
-    font-family: "Barlow", sans-serif;
-    text-align: center;
-    transition: opacity 1s ease-out; /* Smooth fade out effect */
-    gap: 2rem;
-  }
-
-  #intro-screen.fade-out {
-    opacity: 0;
-    visibility: hidden; /* Hide element after fading out */
-  }
-
-  #intro-screen img {
-    max-width: 80%; /* Adjust size of your logo */
-    width: 50%;
-    height: auto;
-    margin-top: 4rem; /* Spostato leggermente più in basso per lasciare spazio sopra */
-  }
-
-  #intro-screen h1 {
-    font-size: 3.5em; /* Adjust font size for title */
-    margin-bottom: 20px;
-  }
-
-  #intro-screen p {
-    font-size: 1.5em; /* Adjust font size for body text */
-    line-height: 1.5;
-    max-width: 80%;
-    margin: 0;
-  }
-
-  #intro-screen .subtitle {
-    font-size: 40px;
-    font-weight: 700;
-    line-height: normal;
-    margin: 0;
-  }
-
-  #intro-screen .subtitle span {
-    color: #FFC511;
-  }
-
-  #intro-screen .textContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-
-  }
-
-  #intro-screen .description {
-    font-size: 32px;
-    font-weight: 500;
-    line-height: normal;
-  }
-
-  #intro-screen button {
-    background-color: white; /* Button background color */
-    color: #005832; /* Button text color */
-    font-size: 2em;
-    padding: 16px 64px;
-    border: none;
-    border-radius: 100px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    margin-top: 20px;
-  }
-
-  
-
-  #intro-screen button:hover {
-    background-color: #e0b000; /* Darker yellow on hover */
-  }
-
-  .footer-text {
-    font-size: 24px;
-    color: #FFF; /* White color for better visibility */
-    text-align: center;
-    position: fixed;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    pointer-events: none;
-  }
-
-  .logo-game-screen {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1001; /* Assicurati che sia sopra il canvas di Phaser */
-    width: 200px; /* Esempio di dimensione, adatta alle tue esigenze */
-  }
-
-  .logo-game-screen img {
-      width: 100%;
-      height: auto;
-  }
-
-  /* Style for the Game Over screen */
-  #game-over-screen {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #005832; /* Colore di sfondo verde */
-    background-image: url('assets/images/webspace_bg.png'); /* Immagine di sfondo */
-    background-size: contain;
-    background-position: bottom;
-    background-repeat: no-repeat;
-    display: flex; /* Inizia nascosto, verrà mostrato da JS */
-    flex-direction: column;
-    align-items: center;
-    z-index: 9998; /* Un po' meno di intro-screen, ma comunque alto */
-    color: #FFF;
-    font-family: "Barlow", sans-serif;
-    text-align: center;
-    gap: 2rem;
-    /* Aggiungi queste per nasconderlo inizialmente */
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 1s ease-out; /* Per un effetto fade-in/out */
-  }
-
-  #game-over-screen.show {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  #game-over-screen img {
-    max-width: 80%;
-    width: 50%;
-    height: auto;
-    margin-top: 4rem;
-  }
-
-  #game-over-screen h1 {
-    font-size: 3.5em;
-    margin-bottom: 20px;
-  }
-
-  #game-over-screen .subtitle {
-    font-size: 40px;
-    font-weight: 700;
-    line-height: normal;
-    margin: 0;
-  }
-
-  #game-over-screen .subtitle span {
-    color: #FFC511;
-  }
-
-  #game-over-screen .textContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-  }
-
-  #game-over-screen button {
-    background-color: white;
-    color: #005832;
-    font-size: 2em;
-    padding: 16px 64px;
-    border: none;
-    border-radius: 100px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    margin-top: 20px;
-  }
-
-  #game-over-screen button:hover {
-    background-color: #e0b000;
-  }
-
-  /* Nuovo stile per il contatore dei tiri */
-  #shots-counter {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: rgba(0, 88, 50, 0.8); /* Sfondo verde scuro semi-trasparente */
-    color: #FFF;
-    font-size: 48px;
-    padding: 10px 20px;
-    border-radius: 10px;
-    z-index: 1002; /* Sopra tutto il resto */
-  }
-
-  #current-shots {
-    font-weight: bold;
-  }
-  </style>
 </head>
 <body>
-  <div id="game-over-screen">
-    <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
-    <h1>Tempo Scaduto!</h1>
-    <div class="textContainer">
-        <p class="subtitle">Hai totalizzato <br> <span id="final-score">0</span> punti!</p>
-    </div>
-    <button id="restartButton">Gioca ancora</button>
-  </div>
-
-  <div id="intro-screen">
-    <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+  <div class="page" id="pageIntro">
+    <img class="centeredLogo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
     <h1>Benvenut*!</h1>
     <div class="textContainer">
         <p class="subtitle">Pront* per il <br> <span>Basket Corner</span> di Amadori? 🏀</p>
         <p class="description">Metti alla prova il tuo talento! <br> Tira, segna e scala la classifica:  <br> più punti fai, più diventerai un PRO!</p>
     </div>
-    <button id="startButton">Gioca ora</button>
+    <button class="button" id="startButton">Gioca ora</button>
   </div>
 
-  <div class="logo-game-screen">
-    <img  src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+  <div class="page" id="pageGameOver">
+    <img class="centeredLogo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+    <h1>Game over</h1>
+    <div class="textContainer">
+        <p class="subtitle">Hai esaurito i tuoi 20 tiri 🏀 <br>
+        e totalizzato <span id="final-score">0</span> canestri! </p>
+        <p class="description">Riprova a supera il tuo record</p>
+    </div>
+    <button class="button" id="restartButton">Gioca ancora</button>
   </div>
 
-  <div id="shots-counter">
-    Tiri: <span id="current-shots">0</span>/<span id="max-shots">20</span>
+  <div class="pageGameHeader">
+    <img src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+  </div>
+
+  <div id="shotsCounter">
+    Tiri: <span id="currentShots">0</span>/<span id="max-shots">20</span>
   </div>
 
   <div class="GameContainer" id="game-container"></div>
-  <span class="footer-text">Trascina rapidamente la palla per lanciarla nel canestro!</span>
+  <div class="footer">
+    <span class="footerDesc">Trascina rapidamente la palla per lanciarla nel canestro!</span>
+  </div>
 
   <script>
     var gameWidth = 810;
@@ -384,8 +157,6 @@
       left_rim.body.collides([collisionGroup]);
       right_rim.body.collides([collisionGroup]);
 
-      // --- Aggiungi qui gli sfondi per il punteggio e il record ---
-
       // Sfondo per il punteggio corrente
       current_score_bg = game.add.graphics(0, 0);
       current_score_bg.beginFill(0x8bc34a, 0.8); // Verde chiaro (Lime 500) con opacità
@@ -399,9 +170,6 @@
       high_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60); // Posizione e dimensione
       high_score_bg.endFill();
       high_score_bg.alpha = 0; // Inizia nascosto, verrà mostrato quando c'è un record
-
-      // --- Fine aggiunta sfondi ---
-
 
       current_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '0', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
       current_score_text.anchor.setTo(0.5, 0.5);
@@ -420,22 +188,20 @@
       game.world.bringToTop(current_best_text);
       game.world.bringToTop(current_best_score_text);
 
-      
-
       createBall();
 
       // Gestione della pagina introduttiva
-      var introScreen = document.getElementById('intro-screen');
+      var introScreen = document.getElementById('pageIntro');
       var startButton = document.getElementById('startButton'); // Ottieni il riferimento al pulsante
        // Recupera i riferimenti per la schermata di Game Over
-      gameOverScreen = document.getElementById('game-over-screen');
+      gameOverScreen = document.getElementById('pageGameOver');
       finalScoreText = document.getElementById('final-score');
       restartButton = document.getElementById('restartButton');
 
-       restartButton.addEventListener('click', restartGame);
+      restartButton.addEventListener('click', restartGame);
 
       // Inizializza gli elementi del contatore tiri
-      currentShotsElement = document.getElementById('current-shots');
+      currentShotsElement = document.getElementById('currentShots');
       maxShotsElement = document.getElementById('max-shots');
       maxShotsElement.textContent = maxShots; // Imposta il valore massimo dei tiri
       updateShotsCounter(); // Aggiorna il contatore all'inizio
