@@ -183,7 +183,11 @@ body {
 @media screen and (max-width: 768px) {
     .page {
         padding: 1rem;
-            box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    .page .centeredLogo {
+        margin-top: 1rem;
     }
 
     .page h1 {
@@ -205,15 +209,6 @@ body {
 
     .footer .footerDesc {
         font-size: 1.2rem;
-    }
-
-    .page h1,
-    .page .subtitle,
-    .page .description {
-        white-space: break-spaces;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        text-align: center;
     }
 
     #shotsCounter {
