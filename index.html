@@ -117,14 +117,14 @@
     var scaleFactor = 2;
 
     function create() {
-// Riprendi l'AudioContext al primo input utente (click/tap)
-  game.input.onDown.addOnce(() => {
-    if (game.sound.context.state === 'suspended') {
-      game.sound.context.resume().then(() => {
-        console.log('AudioContext resumed!');
-      });
-    }
-  });
+      // Riprendi l'AudioContext al primo input utente (click/tap)
+        game.input.onDown.addOnce(() => {
+          if (game.sound.context.state === 'suspended') {
+            game.sound.context.resume().then(() => {
+              console.log('AudioContext resumed!');
+            });
+          }
+        });
 
       
       game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
