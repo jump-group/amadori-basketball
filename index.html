@@ -45,7 +45,7 @@
     <span class="footerDesc">Trascina rapidamente la palla per lanciarla nel canestro!</span>
   </div>
 
-  <script>
+<script>
     var gameWidth = 810;
     var gameHeight = 1080;
 
@@ -112,7 +112,7 @@
       game.physics.startSystem(Phaser.Physics.P2JS);
       game.physics.p2.setImpactEvents(true);
       game.physics.p2.restitution = 0.63;
-      game.physics.p2.gravity.y = 0;
+      game.physics.p2.gravity.y = 2500 * scaleFactor;
       collisionGroup = game.physics.p2.createCollisionGroup();
 
       score_sound = game.add.audio('score');
@@ -147,9 +147,9 @@
       right_rim.scale.setTo(scaleFactor, scaleFactor);
 
       game.physics.p2.enable([left_rim, right_rim], false);
-      left_rim.body.setCircle(2.5 * scaleFactor);
+      left_rim.body.setCircle(5 * scaleFactor);
       left_rim.body.static = true;
-      right_rim.body.setCircle(2.5 * scaleFactor);
+      right_rim.body.setCircle(5 * scaleFactor);
       right_rim.body.static = true;
 
       left_rim.body.setCollisionGroup(collisionGroup);
@@ -159,17 +159,17 @@
 
       // Sfondo per il punteggio corrente
       current_score_bg = game.add.graphics(0, 0);
-      current_score_bg.beginFill(0x8bc34a, 0.8); // Verde chiaro (Lime 500) con opacità
-      current_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60); // Posizione e dimensione
+      current_score_bg.beginFill(0x8bc34a, 0.8);
+      current_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60);
       current_score_bg.endFill();
-      current_score_bg.alpha = 0; // Inizia nascosto, verrà mostrato quando il punteggio è 0
+      current_score_bg.alpha = 0;
 
       // Sfondo per il record (high score)
       high_score_bg = game.add.graphics(0, 0);
-      high_score_bg.beginFill(0x8bc34a, 0.8); // Verde chiaro (Lime 500) con opacità
-      high_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60); // Posizione e dimensione
+      high_score_bg.beginFill(0x8bc34a, 0.8);
+      high_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60);
       high_score_bg.endFill();
-      high_score_bg.alpha = 0; // Inizia nascosto, verrà mostrato quando c'è un record
+      high_score_bg.alpha = 0;
 
       current_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '0', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
       current_score_text.anchor.setTo(0.5, 0.5);
@@ -181,10 +181,10 @@
       current_best_score_text.anchor.setTo(0.5, 0.5);
 
       // Posiziona il testo sopra il suo sfondo
-      current_score_bg.bringToBack = false; // Non è una funzione, ma un'idea. useremo setChildIndex
-      game.world.bringToTop(current_score_bg); // Assicurati che lo sfondo sia sopra il field
-      game.world.bringToTop(high_score_bg); // Assicurati che lo sfondo sia sopra il field
-      game.world.bringToTop(current_score_text); // Metti il testo sopra il suo sfondo
+      current_score_bg.bringToBack = false;
+      game.world.bringToTop(current_score_bg);
+      game.world.bringToTop(high_score_bg);
+      game.world.bringToTop(current_score_text);
       game.world.bringToTop(current_best_text);
       game.world.bringToTop(current_best_score_text);
 
@@ -192,8 +192,7 @@
 
       // Gestione della pagina introduttiva
       var introScreen = document.getElementById('pageIntro');
-      var startButton = document.getElementById('startButton'); // Ottieni il riferimento al pulsante
-       // Recupera i riferimenti per la schermata di Game Over
+      var startButton = document.getElementById('startButton');
       gameOverScreen = document.getElementById('pageGameOver');
       finalScoreText = document.getElementById('final-score');
       restartButton = document.getElementById('restartButton');
@@ -203,23 +202,21 @@
       // Inizializza gli elementi del contatore tiri
       currentShotsElement = document.getElementById('currentShots');
       maxShotsElement = document.getElementById('max-shots');
-      maxShotsElement.textContent = maxShots; // Imposta il valore massimo dei tiri
-      updateShotsCounter(); // Aggiorna il contatore all'inizio
+      maxShotsElement.textContent = maxShots;
+      updateShotsCounter();
 
       // Aggiungi un listener solo al pulsante
       startButton.addEventListener('click', function() {
           if (!introShown) {
-              introScreen.classList.add('fade-out'); // Avvia la transizione CSS
-              // Rimuovi lo schermo intro dopo la transizione (1 secondo)
+              introScreen.classList.add('fade-out');
               setTimeout(function() {
                   introScreen.style.display = 'none';
                   introShown = true;
-                  // Ora che l'intro è andata, abilita gli input del gioco
                   game.input.onDown.add(click, this);
                   game.input.onUp.add(release, this);
-              }.bind(this), 1000); // 1000ms = 1s, deve corrispondere alla durata della transizione CSS
+              }.bind(this), 1000);
           }
-      }.bind(this)); // Bind 'this' per mantenere il contesto di Phaser
+      }.bind(this));
     }
 
     function updateShotsCounter() {
@@ -227,40 +224,33 @@
     }
 
     function restartGame() {
-        // Nascondi la schermata di Game Over
         gameOverScreen.classList.remove('show');
 
-        // Resetta lo stato del gioco
         totalShots = 0;
-        current_score = 0; // Resetta il punteggio corrente per la nuova partita
-        // high_score NON viene resettato qui, mantiene il record storico
+        current_score = 0;
         
-        // Reset della palla e dell'interfaccia utente come all'inizio di un nuovo gioco
         createBall();
-        current_score_text.text = current_score; // Imposta a 0
+        current_score_text.text = current_score;
         current_score_text.alpha = 1;
         current_score_bg.alpha = 1;
         
-        // Assicurati che il record sia nascosto all'inizio di una nuova partita
         current_best_text.alpha = 0;
         current_best_score_text.alpha = 0;
         high_score_bg.alpha = 0;
 
-        updateShotsCounter(); // Aggiorna il contatore dei tiri
+        updateShotsCounter();
 
-        // Assicurati che l'input del gioco sia abilitato
         game.input.onDown.add(click, this);
         game.input.onUp.add(release, this);
     }
 
     function update() {
-        // Solo aggiorna la logica del gioco se l'introduzione è stata mostrata
         if (!introShown) {
-            return; // Esci dalla funzione update se l'intro è ancora attiva
+            return;
         }
 
         if (ball && ball.body.velocity.y > 0 && !front_rim) {
-            front_rim = game.add.sprite(hoop.x - (52 * scaleFactor), hoop.y + (100 * scaleFactor), 'front rim');
+            front_rim = game.add.sprite(hoop.x - (50 * scaleFactor), hoop.y + (100 * scaleFactor), 'front rim');
             front_rim.scale.setTo(scaleFactor, scaleFactor);
         }
         if (ball && ball.body.velocity.y < 0 && front_rim) {
@@ -283,12 +273,10 @@
                 current_score_text.text = current_score;
                 score_sound.play();
 
-                // Aggiorna high_score solo se il current_score è maggiore
                 if (current_score > high_score) {
                     high_score = current_score;
                 }
                 
-                // In caso di canestro, il punteggio corrente rimane visibile, il record è nascosto (fino a fine partita)
                 current_score_bg.alpha = 1;
                 current_score_text.alpha = 1;
                 high_score_bg.alpha = 0;
@@ -298,17 +286,15 @@
             } else {
                 emojiName = "lose" + rand;
                 fail.play();
-                // NON resettare current_score a 0 qui, lo lasciamo per la prossima palla
                 
-                // Mostra il record attuale (non il punteggio corrente)
-                current_score_text.alpha = 0; // Nascondi il testo del punteggio corrente
-                current_score_bg.alpha = 0;   // Nascondi il suo sfondo
+                current_score_text.alpha = 0;
+                current_score_bg.alpha = 0;
 
                 current_best_text.text = 'Il tuo record';
-                current_best_score_text.text = high_score; // Mostra il record storico
-                high_score_bg.alpha = 1; // Mostra lo sfondo del record
-                current_best_text.alpha = 1; // Mostra il testo "Il tuo record"
-                current_best_score_text.alpha = 1; // Mostra il numero del record
+                current_best_score_text.text = high_score;
+                high_score_bg.alpha = 1;
+                current_best_text.alpha = 1;
+                current_best_score_text.alpha = 1;
             }
             emoji = game.add.sprite(gameWidth / 2, hoop.y + (70 * scaleFactor), emojiName);
             emoji.anchor.setTo(0.5, 0.5);
@@ -318,17 +304,15 @@
             moveInTween.onComplete.add(tweenOut, this);
         }
 
-        // Se la palla è uscita dallo schermo
-        if (ball && ball.body.y > gameHeight + (100 * scaleFactor)) {
-            game.physics.p2.gravity.y = 0; // Ferma la gravità
-            ball.kill(); // Uccidi lo sprite della palla
-            ball = null; // Rimuovi il riferimento alla palla
+        if (ball && ball.body.y > gameHeight + (gameHeight * 0.2)) {
+            game.physics.p2.gravity.y = 0;
+            ball.kill();
+            ball = null;
 
-            // Controlla il numero di tiri DOPO che la palla è uscita dallo schermo
             if (totalShots >= maxShots) {
-                endGame(); // Termina il gioco se abbiamo esaurito i tiri
+                endGame();
             } else {
-                createBall(); // Altrimenti, crea una nuova palla per il prossimo tiro
+                createBall();
             }
         }
     }
@@ -356,7 +340,6 @@
       ball.launched = false;
       ball.isBelowHoop = false;
 
-      // Quando viene creata una nuova palla, mostra il punteggio corrente (non il record)
       current_score_text.text = current_score;
       current_score_text.alpha = 1;
       current_score_bg.alpha = 1;
@@ -384,7 +367,10 @@
         end_location = [pointer.x, pointer.y];
         if (end_location[1] < start_location[1]) {
           var slope = [end_location[0] - start_location[0], end_location[1] - start_location[1]];
-          var x_traj = -2300 * scaleFactor * slope[0] / slope[1];
+          // Ho modificato questo valore per ridurre la velocità laterale del tiro.
+          // Un valore più basso (più vicino a 0) renderà la palla meno influenzata dal movimento orizzontale.
+          // Era -2300 * scaleFactor, ora è -1500 * scaleFactor.
+          var x_traj = -1500 * scaleFactor * slope[0] / slope[1];
           launch(x_traj);
         }
       }
@@ -395,7 +381,6 @@
        ball.body.setCircle(36 * scaleFactor * 0.6);
         ball.body.setCollisionGroup(collisionGroup);
 
-        // Nascondi il record quando si lancia la palla, mostra il punteggio corrente
         high_score_bg.alpha = 0;
         current_best_text.alpha = 0;
         current_best_score_text.alpha = 0;
@@ -403,40 +388,38 @@
         current_score_text.alpha = 1;
 
         ball.launched = true;
-        game.physics.p2.gravity.y = 3000 * scaleFactor;
+        game.physics.p2.gravity.y = 2500 * scaleFactor; // Mantengo la gravità a 2500 per evitare che galleggi troppo
         game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
         ball.body.velocity.x = x_traj;
-        ball.body.velocity.y = -1750 * scaleFactor;
+        // Ho modificato questo valore per ridurre la velocità verticale iniziale del tiro.
+        // Un valore più basso (in valore assoluto, dato che è negativo) renderà la palla meno "sparata" verso l'alto.
+        // Era -2000 * scaleFactor, ora è -1500 * scaleFactor.
+        ball.body.velocity.y = -1500 * scaleFactor;
         ball.body.rotateRight(x_traj / 3);
         whoosh.play();
 
-        // Incrementa il contatore dei tiri e aggiorna l'elemento HTML
         totalShots++;
         updateShotsCounter();
       }
     }
 
     function endGame() {
-        // Disabilita gli input del gioco
         game.input.onDown.removeAll();
         game.input.onUp.removeAll();
 
-        // Uccidi la palla se è ancora presente
         if (ball) {
             ball.kill();
             ball = null;
         }
 
-        // Assicurati che tutti i testi del punteggio siano nascosti
         current_score_text.alpha = 0;
         current_score_bg.alpha = 0;
         current_best_text.alpha = 0;
         current_best_score_text.alpha = 0;
         high_score_bg.alpha = 0;
 
-        // Mostra il punteggio finale sulla schermata di Game Over
-        finalScoreText.textContent = current_score; // Mostra il punteggio corrente finale
-        gameOverScreen.classList.add('show'); // Mostra la schermata di Game Over
+        finalScoreText.textContent = current_score;
+        gameOverScreen.classList.add('show');
     }
   </script>
 </body>
