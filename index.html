@@ -328,6 +328,19 @@
         current_score++;
         current_score_text.text = current_score;
         score_sound.play();
+
+        var bravoText = game.add.text(gameWidth / 2, hoop.y + (220 * scaleFactor), "Bravo!", {
+          font: 'bold 36px Arial',
+          fill: '#FFD700',
+          align: 'center'
+        });
+        bravoText.anchor.setTo(0.5);
+
+        // Nasconde la scritta dopo 1.5 secondi
+        game.time.events.add(Phaser.Timer.SECOND * 1.5, function () {
+          bravoText.destroy();
+        });
+
         if (current_score > high_score) high_score = current_score;
         current_score_bg.alpha = 1;
         current_score_text.alpha = 1;
