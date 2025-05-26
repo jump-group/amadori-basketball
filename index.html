@@ -26,7 +26,7 @@
     <img class="centeredLogo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
     <h1>Game over</h1>
     <div class="textContainer">
-        <p class="subtitle">Hai esaurito i tuoi 20 tiri 🏀 <br>
+        <p class="subtitle">Hai esaurito i tuoi <span id="max-shots-gameover">20</span> tiri 🏀 <br>
         e totalizzato <span id="final-score">0</span> canestri! </p>
         <p class="description">Riprova a supera il tuo record</p>
     </div>
@@ -204,6 +204,10 @@
       currentShotsElement = document.getElementById('currentShots');
       maxShotsElement = document.getElementById('max-shots');
       maxShotsElement.textContent = maxShots;
+
+      var maxShotGameover = document.getElementById('max-shots-gameover')
+      maxShotGameover.textContent = maxShots;
+
       updateShotsCounter();
 
       // Aggiungi un listener solo al pulsante
@@ -407,24 +411,29 @@
       }
     }
 
-    function endGame() {
-        game.input.onDown.removeAll();
-        game.input.onUp.removeAll();
+  function endGame() {
+      game.input.onDown.removeAll();
+      game.input.onUp.removeAll();
 
-        if (ball) {
-            ball.kill();
-            ball = null;
-        }
+      if (ball) {
+          ball.kill();
+          ball = null;
+      }
 
-        current_score_text.alpha = 0;
-        current_score_bg.alpha = 0;
-        current_best_text.alpha = 0;
-        current_best_score_text.alpha = 0;
-        high_score_bg.alpha = 0;
+      current_score_text.alpha = 0;
+      current_score_bg.alpha = 0;
+      current_best_text.alpha = 0;
+      current_best_score_text.alpha = 0;
+      high_score_bg.alpha = 0;
 
-        finalScoreText.textContent = current_score;
-        gameOverScreen.classList.add('show');
-    }
+      finalScoreText.textContent = current_score;
+      gameOverScreen.classList.add('show');
+
+      // Reset variabili punteggio e tiri
+      totalShots = 0;
+      current_score = 0;
+      updateShotsCounter();
+  }
   </script>
 </body>
 </html>
