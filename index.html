@@ -291,11 +291,12 @@
                 current_score_text.alpha = 0;
                 current_score_bg.alpha = 0;
 
-                current_best_text.text = 'Il tuo record';
-                current_best_score_text.text = high_score;
-                high_score_bg.alpha = 1;
-                current_best_text.alpha = 1;
-                current_best_score_text.alpha = 1;
+                // Rimosse o commentate le seguenti righe per eliminare "Il tuo record"
+                // current_best_text.text = 'Il tuo record';
+                // current_best_score_text.text = high_score;
+                // high_score_bg.alpha = 1;
+                // current_best_text.alpha = 1;
+                // current_best_score_text.alpha = 1;
             }
             emoji = game.add.sprite(gameWidth / 2, hoop.y + (70 * scaleFactor), emojiName);
             emoji.anchor.setTo(0.5, 0.5);
