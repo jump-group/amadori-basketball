@@ -68,13 +68,15 @@
 
   var introShown = false;
   var totalShots = 0;
-  var maxShots = 5;
+  var maxShots = 20;
   var gameOverScreen;
   var finalScoreText;
   var restartButton;
 
   var currentShotsElement;
   var maxShotsElement;
+
+  var isFirstBall = true; // Variabile per il controllo della prima palla
 
   function preload() {
     game.load.image('field', 'assets/images/field.png');
@@ -196,7 +198,6 @@
 
     startButton.addEventListener('click', function () {
       if (!introShown) {
-        // Resume AudioContext on button click
         if (game.sound.context.state === 'suspended') {
           game.sound.context.resume().then(() => {
             console.log('AudioContext resumed!');
@@ -222,6 +223,7 @@
     gameOverScreen.classList.remove('show');
     totalShots = 0;
     current_score = 0;
+    isFirstBall = true; // Ripristina la variabile al restart
     createBall();
     current_score_text.text = current_score;
     current_score_text.alpha = 1;
@@ -307,7 +309,15 @@
   }
 
   function createBall() {
-    var xpos = gameWidth / 2;
+    let xpos;
+
+    if (isFirstBall) {
+      xpos = gameWidth / 2; // Prima palla al centro
+    } else {
+      const possiblePositions = [gameWidth / 4, gameWidth / 2, gameWidth * 3 / 4];
+      xpos = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+    }
+
     var fixedY = gameHeight * 0.82;
 
     spawn.play();
@@ -344,51 +354,50 @@
       clearInterval(location_interval);
       isDown = false;
       end_location = [pointer.x, pointer.y];
-      if (end_location[1] < start_location[1]) {
-        var slope = [end_location[0] - start_location[0], end_location[1] - start_location[1]];
-        var x_traj = -1500 * scaleFactor * slope[0] / slope[1];
+      if (start_location && end_location) {
+        var x_traj = (start_location[0] - end_location[0]) * 10;
         launch(x_traj);
       }
     }
   }
 
-  function launch(x_traj) {
-    if (!ball.launched) {
-      ball.body.setCircle(36 * scaleFactor * 0.6);
-      ball.body.setCollisionGroup(collisionGroup);
-      ball.launched = true;
-      game.physics.p2.gravity.y = 2500 * scaleFactor;
-      game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
-      ball.body.velocity.x = x_traj;
-      ball.body.velocity.y = -1500 * scaleFactor;
-      ball.body.rotateRight(x_traj / 3);
-      whoosh.play();
-      totalShots++;
-      updateShotsCounter();
+function launch(x_traj) {
+  if (!ball.launched) {
+    // Correggi direzione orizzontale
+    if (ball.x < gameWidth / 2 && x_traj < 0) {
+      x_traj = -x_traj;
+    } else if (ball.x > gameWidth / 2 && x_traj > 0) {
+      x_traj = -x_traj;
+    }
+
+    ball.body.setCircle(36 * scaleFactor * 0.6);
+    ball.body.setCollisionGroup(collisionGroup);
+    ball.launched = true;
+    game.physics.p2.gravity.y = 2500 * scaleFactor;
+    game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
+    ball.body.velocity.x = x_traj;
+    ball.body.velocity.y = -1500 * scaleFactor;
+    ball.body.rotateRight(x_traj / 3);
+    whoosh.play();
+    totalShots++;
+    updateShotsCounter();
+
+    if (isFirstBall) {
+      isFirstBall = false; // Cambia qui, dopo il primo lancio
     }
   }
+}
+
 
   function endGame() {
-    game.input.onDown.removeAll();
-    game.input.onUp.removeAll();
-    if (ball) {
-      ball.kill();
-      ball = null;
-    }
-
-    current_score_text.alpha = 0;
-    current_score_bg.alpha = 0;
-    current_best_text.alpha = 0;
-    current_best_score_text.alpha = 0;
-    high_score_bg.alpha = 0;
-
-    finalScoreText.textContent = current_score;
+    game.input.onDown.remove(click, this);
+    game.input.onUp.remove(release, this);
     gameOverScreen.classList.add('show');
-    totalShots = 0;
-    current_score = 0;
-    updateShotsCounter();
+    finalScoreText.textContent = "Punteggio finale: " + current_score;
   }
 </script>
+
+
 
 </body>
 </html>
