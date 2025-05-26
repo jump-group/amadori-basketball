@@ -14,6 +14,8 @@ Il gioco è sviluppato con JavaScript, Phaser, e Canvas.
 
 ## Features 
 Rispetto alla repo base, ci sono le seguenti feature aggiuntive:
-- Pagina introduttiva e pagina di gameover
-- Massimo impostabile del numero di tiri
+- Responsive mantenendo un aspect ration del canvas in modalità portrait;
+- Pagina introduttiva e pagina di gameover;
+- Massimo impostabile del numero di tiri;
+- Contatore in game del numero di tiri eseguiti;
 
