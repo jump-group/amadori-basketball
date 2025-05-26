@@ -51,7 +51,6 @@
   </div>
 
 <script>
-
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then(() => console.log('SW registrato'))
@@ -67,32 +66,24 @@
     update: update
   });
 
-  var introShown = false; // Variabile per tenere traccia se l'introduzione è stata mostrata
-  var totalShots = 0;     // Contatore dei tiri
-  var maxShots = 5;      // Numero massimo di tiri consentiti
-  var gameOverScreen;     // Riferimento al div della schermata di game over
-  var finalScoreText;     // Riferimento allo span del punteggio finale
-  var restartButton;      // Riferimento al pulsante di riavvio
+  var introShown = false;
+  var totalShots = 0;
+  var maxShots = 5;
+  var gameOverScreen;
+  var finalScoreText;
+  var restartButton;
 
-  // Nuove variabili per il contatore dei tiri nell'HTML
   var currentShotsElement;
   var maxShotsElement;
 
   function preload() {
     game.load.image('field', 'assets/images/field.png');
-
     game.load.image('ball', 'assets/images/ball.png');
-    game.load.image('hoop', 'assets/images/hoop_new_1.png');
+    game.load.image('hoop', 'assets/images/hoop.png');
     game.load.image('side rim', 'assets/images/side_rim.png');
     game.load.image('front rim', 'assets/images/front_rim.png');
 
-    var winImages = ['win0', 'win1', 'win2'];
-    var loseImages = ['lose0', 'lose1', 'lose2'];
-
-    winImages.forEach(function(name) {
-      game.load.image(name, 'assets/images/' + name + '.png');
-    });
-    loseImages.forEach(function(name) {
+    ['win0','win1','win2','lose0','lose1','lose2'].forEach(function(name) {
       game.load.image(name, 'assets/images/' + name + '.png');
     });
 
@@ -109,23 +100,10 @@
   var moveInTween, fadeInTween, moveOutTween, fadeOutTween, emoji, emojiName;
   var collisionGroup;
   var isDown = false, start_location, end_location, location_interval;
-
-  // Aggiungi queste variabili per gli sfondi del testo
-  var current_score_bg; // Sfondo per il punteggio corrente
-  var high_score_bg;    // Sfondo per il record
-
+  var current_score_bg, high_score_bg;
   var scaleFactor = 2;
 
   function create() {
-    // Riprendi l'AudioContext al primo input utente (click/tap)
-    game.input.onDown.addOnce(() => {
-      if (game.sound.context.state === 'suspended') {
-        game.sound.context.resume().then(() => {
-          console.log('AudioContext resumed!');
-        });
-      }
-    });
-
     game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
     game.scale.pageAlignHorizontally = true;
     game.scale.pageAlignVertically = true;
@@ -147,17 +125,13 @@
     fail = game.add.audio('fail'); fail.volume = 0.1;
     spawn = game.add.audio('spawn');
 
-    // Imposta il colore di sfondo verde dello stage di Phaser
     game.stage.backgroundColor = "#005832";
 
     field_background = game.add.sprite(game.world.centerX, game.world.height - 70, 'field');
     field_background.anchor.setTo(0.5, 1);
-
-    var scaleX = game.world.width / field_background.width;
-    var scaleY = game.world.height / field_background.height;
-    var scale = Math.min(scaleX, scaleY);
-
-    field_background.scale.setTo(scale);
+    field_background.scale.setTo(
+      Math.min(game.world.width / field_background.width, game.world.height / field_background.height)
+    );
     field_background.sendToBack();
 
     hoop = game.add.sprite(gameWidth / 2, gameHeight * 0.10, 'hoop');
@@ -165,32 +139,23 @@
     hoop.scale.setTo(1, 1);
 
     left_rim = game.add.sprite(hoop.x - (50 * scaleFactor), hoop.y + (103 * scaleFactor), 'side rim');
-    left_rim.anchor.setTo(0.5, 0.5);
-    left_rim.scale.setTo(scaleFactor, scaleFactor);
-
     right_rim = game.add.sprite(hoop.x + (50 * scaleFactor), hoop.y + (103 * scaleFactor), 'side rim');
-    right_rim.anchor.setTo(0.5, 0.5);
-    right_rim.scale.setTo(scaleFactor, scaleFactor);
+    [left_rim, right_rim].forEach(rim => {
+      rim.anchor.setTo(0.5);
+      rim.scale.setTo(scaleFactor);
+      game.physics.p2.enable(rim, false);
+      rim.body.setCircle(5 * scaleFactor);
+      rim.body.static = true;
+      rim.body.setCollisionGroup(collisionGroup);
+      rim.body.collides([collisionGroup]);
+    });
 
-    game.physics.p2.enable([left_rim, right_rim], false);
-    left_rim.body.setCircle(5 * scaleFactor);
-    left_rim.body.static = true;
-    right_rim.body.setCircle(5 * scaleFactor);
-    right_rim.body.static = true;
-
-    left_rim.body.setCollisionGroup(collisionGroup);
-    right_rim.body.setCollisionGroup(collisionGroup);
-    left_rim.body.collides([collisionGroup]);
-    right_rim.body.collides([collisionGroup]);
-
-    // Sfondo per il punteggio corrente
     current_score_bg = game.add.graphics(0, 0);
     current_score_bg.beginFill(0x8bc34a, 0.8);
     current_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60);
     current_score_bg.endFill();
     current_score_bg.alpha = 0;
 
-    // Sfondo per il record (high score)
     high_score_bg = game.add.graphics(0, 0);
     high_score_bg.beginFill(0x8bc34a, 0.8);
     high_score_bg.drawCircle(gameWidth / 2, hoop.y + (250 * scaleFactor), 60);
@@ -198,16 +163,14 @@
     high_score_bg.alpha = 0;
 
     current_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '0', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
-    current_score_text.anchor.setTo(0.5, 0.5);
+    current_score_text.anchor.setTo(0.5);
 
     current_best_text = game.add.text(gameWidth / 2, hoop.y + (220 * scaleFactor), '', { font: 'Arial', fontSize: '36px', fill: '#FFF', align: 'center' });
-    current_best_text.anchor.setTo(0.5, 0.5);
+    current_best_text.anchor.setTo(0.5);
 
     current_best_score_text = game.add.text(gameWidth / 2, hoop.y + (250 * scaleFactor), '', { font: 'Arial', fontSize: '40px', fill: '#FFF', align: 'center' });
-    current_best_score_text.anchor.setTo(0.5, 0.5);
+    current_best_score_text.anchor.setTo(0.5);
 
-    // Posiziona il testo sopra il suo sfondo
-    current_score_bg.bringToBack = false;
     game.world.bringToTop(current_score_bg);
     game.world.bringToTop(high_score_bg);
     game.world.bringToTop(current_score_text);
@@ -216,7 +179,6 @@
 
     createBall();
 
-    // Gestione della pagina introduttiva
     var introScreen = document.getElementById('pageIntro');
     var startButton = document.getElementById('startButton');
     gameOverScreen = document.getElementById('pageGameOver');
@@ -225,128 +187,110 @@
 
     restartButton.addEventListener('click', restartGame);
 
-    // Inizializza gli elementi del contatore tiri
     currentShotsElement = document.getElementById('currentShots');
     maxShotsElement = document.getElementById('max-shots');
     maxShotsElement.textContent = maxShots;
-
-    var maxShotGameover = document.getElementById('max-shots-gameover')
-    maxShotGameover.textContent = maxShots;
+    document.getElementById('max-shots-gameover').textContent = maxShots;
 
     updateShotsCounter();
 
-    // Aggiungi un listener solo al pulsante
-    startButton.addEventListener('click', function() {
-      console.log('dentro al click di start');
-        if (!introShown) {
-          console.log('dentro qua');
-            introScreen.classList.add('fade-out');
-            setTimeout(function() {
-                introScreen.style.display = 'none';
-                introShown = true;
-                game.input.onDown.add(click, this);
-                game.input.onUp.add(release, this);
-            }.bind(this), 1000);
+    startButton.addEventListener('click', function () {
+      if (!introShown) {
+        // Resume AudioContext on button click
+        if (game.sound.context.state === 'suspended') {
+          game.sound.context.resume().then(() => {
+            console.log('AudioContext resumed!');
+          });
         }
+
+        introScreen.classList.add('fade-out');
+        setTimeout(function () {
+          introScreen.style.display = 'none';
+          introShown = true;
+          game.input.onDown.add(click, this);
+          game.input.onUp.add(release, this);
+        }.bind(this), 1000);
+      }
     }.bind(this));
   }
 
   function updateShotsCounter() {
-      currentShotsElement.textContent = totalShots;
+    currentShotsElement.textContent = totalShots;
   }
 
   function restartGame() {
     gameOverScreen.classList.remove('show');
-
     totalShots = 0;
     current_score = 0;
-    
     createBall();
     current_score_text.text = current_score;
     current_score_text.alpha = 1;
     current_score_bg.alpha = 1;
-    
     current_best_text.alpha = 0;
     current_best_score_text.alpha = 0;
     high_score_bg.alpha = 0;
-
     updateShotsCounter();
-
     game.input.onDown.add(click, this);
     game.input.onUp.add(release, this);
   }
 
   function update() {
-    if (!introShown) {
-        return;
-    }
+    if (!introShown) return;
 
     if (ball && ball.body.velocity.y > 0 && !front_rim) {
-        front_rim = game.add.sprite(hoop.x - (50 * scaleFactor), hoop.y + (100 * scaleFactor), 'front rim');
-        front_rim.scale.setTo(scaleFactor, scaleFactor);
+      front_rim = game.add.sprite(hoop.x - (50 * scaleFactor), hoop.y + (100 * scaleFactor), 'front rim');
+      front_rim.scale.setTo(scaleFactor);
     }
     if (ball && ball.body.velocity.y < 0 && front_rim) {
-        front_rim.destroy();
-        front_rim = null;
+      front_rim.destroy();
+      front_rim = null;
     }
 
     if (ball && ball.body.velocity.y > 0) {
-        ball.body.collides([collisionGroup], hitRim, this);
+      ball.body.collides([collisionGroup], hitRim, this);
     }
 
     if (ball && ball.body.velocity.y > 0 && ball.body.y > (hoop.y + hoop.height * 0.75) && !ball.isBelowHoop) {
-        ball.isBelowHoop = true;
-        ball.body.collideWorldBounds = false;
+      ball.isBelowHoop = true;
+      ball.body.collideWorldBounds = false;
 
-        var rand = Math.floor(Math.random() * 3);
-        if (ball.body.x > left_rim.x && ball.body.x < right_rim.x) {
-            emojiName = "win" + rand;
-            current_score += 1;
-            current_score_text.text = current_score;
-            score_sound.play();
+      var rand = Math.floor(Math.random() * 3);
+      if (ball.body.x > left_rim.x && ball.body.x < right_rim.x) {
+        emojiName = "win" + rand;
+        current_score++;
+        current_score_text.text = current_score;
+        score_sound.play();
+        if (current_score > high_score) high_score = current_score;
+        current_score_bg.alpha = 1;
+        current_score_text.alpha = 1;
+        high_score_bg.alpha = 0;
+        current_best_text.alpha = 0;
+        current_best_score_text.alpha = 0;
+      } else {
+        emojiName = "lose" + rand;
+        fail.play();
+        current_score_text.alpha = 0;
+        current_score_bg.alpha = 0;
+      }
 
-            if (current_score > high_score) {
-                high_score = current_score;
-            }
-            
-            current_score_bg.alpha = 1;
-            current_score_text.alpha = 1;
-            high_score_bg.alpha = 0;
-            current_best_text.alpha = 0;
-            current_best_score_text.alpha = 0;
-
-        } else {
-            emojiName = "lose" + rand;
-            fail.play();
-            
-            current_score_text.alpha = 0;
-            current_score_bg.alpha = 0;
-
-            // Rimosse o commentate le seguenti righe per eliminare "Il tuo record"
-            // current_best_text.text = 'Il tuo record';
-            // current_best_score_text.text = high_score;
-            // high_score_bg.alpha = 1;
-            // current_best_text.alpha = 1;
-            // current_best_score_text.alpha = 1;
-        }
-        emoji = game.add.sprite(gameWidth / 2, hoop.y + (70 * scaleFactor), emojiName);
-        emoji.anchor.setTo(0.5, 0.5);
-        emoji.scale.setTo(0.25 * scaleFactor, 0.25 * scaleFactor);
-        moveInTween = game.add.tween(emoji).from({ y: emoji.y + (50 * scaleFactor) }, 500, Phaser.Easing.Elastic.Out, true);
-        fadeInTween = game.add.tween(emoji).from({ alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-        moveInTween.onComplete.add(tweenOut, this);
+      emoji = game.add.sprite(gameWidth / 2, hoop.y + (70 * scaleFactor), emojiName);
+      emoji.anchor.setTo(0.5);
+      emoji.scale.setTo(0.25 * scaleFactor);
+      moveInTween = game.add.tween(emoji).from({ y: emoji.y + (50 * scaleFactor) }, 500, Phaser.Easing.Elastic.Out, true);
+      fadeInTween = game.add.tween(emoji).from({ alpha: 0 }, 200, Phaser.Easing.Linear.None, true);
+      moveInTween.onComplete.add(tweenOut, this);
     }
 
     if (ball && ball.body.y > gameHeight + (gameHeight * 0.2)) {
-        game.physics.p2.gravity.y = 0;
-        ball.kill();
-        ball = null;
+      game.physics.p2.gravity.y = 0;
+      ball.kill();
+      ball = null;
 
-        if (totalShots >= maxShots) {
-            endGame();
-        } else {
-            createBall();
-        }
+      if (totalShots >= maxShots) {
+        endGame();
+      } else {
+        createBall();
+      }
     }
   }
 
@@ -354,7 +298,7 @@
     moveOutTween = game.add.tween(emoji).to({ y: emoji.y - (50 * scaleFactor) }, 600, Phaser.Easing.Elastic.In, true);
     moveOutTween.onComplete.add(() => emoji.kill(), this);
     setTimeout(() => {
-      fadeOutTween = game.add.tween(emoji).to({ alpha: 0 }, 300, Phaser.Easing.Linear.None, true, 0, 0, false);
+      fadeOutTween = game.add.tween(emoji).to({ alpha: 0 }, 300, Phaser.Easing.Linear.None, true);
     }, 450);
   }
 
@@ -362,32 +306,23 @@
     backboard.play();
   }
 
-  function createBall() {    
-    var xpos = gameWidth / 2;  // o la posizione orizzontale che vuoi
+  function createBall() {
+    var xpos = gameWidth / 2;
     var fixedY = gameHeight * 0.82;
 
     spawn.play();
     ball = game.add.sprite(xpos, fixedY, 'ball');
-    ball.anchor.setTo(0.5, 0.5);
+    ball.anchor.setTo(0.5);
     game.add.tween(ball.scale).from({ x: 0.7 * scaleFactor, y: 0.7 * scaleFactor }, 100, Phaser.Easing.Linear.None, true);
-    
     game.physics.p2.enable(ball, false);
-
-    // Allinea posizione fisica a quella dello sprite
-    ball.body.x = ball.x;
-    ball.body.y = ball.y;
-
     ball.body.setCircle(60 * scaleFactor * 0.6);
     ball.launched = false;
     ball.isBelowHoop = false;
-
-    // Disabilita gravità fino al lancio
     game.physics.p2.gravity.y = 0;
 
     current_score_text.text = current_score;
     current_score_text.alpha = 1;
     current_score_bg.alpha = 1;
-
     current_best_text.alpha = 0;
     current_best_score_text.alpha = 0;
     high_score_bg.alpha = 0;
@@ -411,9 +346,6 @@
       end_location = [pointer.x, pointer.y];
       if (end_location[1] < start_location[1]) {
         var slope = [end_location[0] - start_location[0], end_location[1] - start_location[1]];
-        // Ho modificato questo valore per ridurre la velocità laterale del tiro.
-        // Un valore più basso (più vicino a 0) renderà la palla meno influenzata dal movimento orizzontale.
-        // Era -2300 * scaleFactor, ora è -1500 * scaleFactor.
         var x_traj = -1500 * scaleFactor * slope[0] / slope[1];
         launch(x_traj);
       }
@@ -424,24 +356,13 @@
     if (!ball.launched) {
       ball.body.setCircle(36 * scaleFactor * 0.6);
       ball.body.setCollisionGroup(collisionGroup);
-
-      high_score_bg.alpha = 0;
-      current_best_text.alpha = 0;
-      current_best_score_text.alpha = 0;
-      current_score_bg.alpha = 1;
-      current_score_text.alpha = 1;
-
       ball.launched = true;
-
-      // Ripristina gravità solo al lancio
       game.physics.p2.gravity.y = 2500 * scaleFactor;
-
       game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
       ball.body.velocity.x = x_traj;
       ball.body.velocity.y = -1500 * scaleFactor;
       ball.body.rotateRight(x_traj / 3);
       whoosh.play();
-
       totalShots++;
       updateShotsCounter();
     }
@@ -450,10 +371,9 @@
   function endGame() {
     game.input.onDown.removeAll();
     game.input.onUp.removeAll();
-
     if (ball) {
-        ball.kill();
-        ball = null;
+      ball.kill();
+      ball = null;
     }
 
     current_score_text.alpha = 0;
@@ -464,12 +384,11 @@
 
     finalScoreText.textContent = current_score;
     gameOverScreen.classList.add('show');
-
-    // Reset variabili punteggio e tiri
     totalShots = 0;
     current_score = 0;
     updateShotsCounter();
   }
-  </script>
+</script>
+
 </body>
 </html>
