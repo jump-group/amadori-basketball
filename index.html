@@ -53,10 +53,10 @@
 <script>
 
   if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(() => console.log('SW registrato'))
-    .catch(err => console.error('Errore SW:', err));
-}
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(() => console.log('SW registrato'))
+      .catch(err => console.error('Errore SW:', err));
+  }
 
     var gameWidth = 810;
     var gameHeight = 1080;
