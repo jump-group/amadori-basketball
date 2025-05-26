@@ -141,9 +141,9 @@ body {
     pointer-events: none;
 }
 
-#pageIntro.fade-out {
+.fade-out {
     opacity: 0;
-    visibility: hidden;
+    /* visibility: hidden; */
 }
 
 #pageGameOver.show {

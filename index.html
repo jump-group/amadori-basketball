@@ -208,7 +208,9 @@
 
       // Aggiungi un listener solo al pulsante
       startButton.addEventListener('click', function() {
+        console.log('dentro al click di start');
           if (!introShown) {
+            console.log('dentro qua');
               introScreen.classList.add('fade-out');
               setTimeout(function() {
                   introScreen.style.display = 'none';
