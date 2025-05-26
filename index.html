@@ -78,6 +78,17 @@
 
   var isFirstBall = true; // Variabile per il controllo della prima palla
 
+  /**
+   * Funzione di pre-caricamento delle risorse di gioco.
+   * Viene eseguita prima che il gioco inizi e serve a caricare:
+   * 
+   * - Immagini statiche: sfondo del campo, palla, canestro, bordi (side/front rim).
+   * - Immagini dinamiche per gli stati di vittoria/sconfitta (emoji "win"/"lose").
+   * - File audio per effetti sonori: punteggio, rimbalzo sul tabellone, lancio (whoosh),
+   *   errore (fail) e comparsa della palla (spawn).
+   * 
+   * Tutte queste risorse saranno disponibili durante il gioco tramite `game.add.image()` o `game.add.audio()`.
+   */
   function preload() {
     game.load.image('field', 'assets/images/field.png');
     game.load.image('ball', 'assets/images/ball.png');
@@ -105,6 +116,24 @@
   var current_score_bg, high_score_bg;
   var scaleFactor = 2;
 
+  /**
+   * Funzione di inizializzazione principale del gioco.
+   * Viene chiamata una sola volta all'avvio del gioco e imposta:
+   * 
+   * - Il ridimensionamento dello schermo per adattarsi a tutte le dimensioni.
+   * - Il sistema fisico (Phaser P2JS) con gravità e rimbalzo configurati.
+   * - I gruppi di collisione e i suoni caricati (score, backboard, whoosh, ecc.).
+   * - L’ambiente grafico: sfondo del campo, canestro e relativi bordi (rims).
+   * - Gli elementi dell'interfaccia utente per mostrare il punteggio attuale e il record.
+   * - Aggiunge il primo pallone chiamando `createBall()`.
+   * - Collega i bottoni HTML del DOM per gestire:
+   *   - L’avvio del gioco (startButton)
+   *   - Il riavvio dopo il game over (restartButton)
+   *   - L’aggiornamento visivo dei tiri rimanenti.
+   * 
+   * Inoltre gestisce l'attivazione dell'audio all'interazione iniziale dell'utente, per sbloccare
+   * la riproduzione dei suoni su alcuni browser (es. Chrome su mobile).
+   */
   function create() {
     game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
     game.scale.pageAlignHorizontally = true;
@@ -215,10 +244,22 @@
     }.bind(this));
   }
 
+  /**
+   * Aggiorna il contatore dei tiri effettuati nella UI.
+   */
   function updateShotsCounter() {
     currentShotsElement.textContent = totalShots;
   }
 
+  /**
+   * Riavvia il gioco dopo che è terminato (Game Over):
+   * - Nasconde la schermata di Game Over.
+   * - Reimposta il numero totale di tiri e il punteggio.
+   * - Reimposta lo stato `isFirstBall` per centrare la prima palla.
+   * - Ricrea la palla.
+   * - Aggiorna la UI per mostrare il punteggio e il contatore dei tiri.
+   * - Riattiva l’ascolto degli input per il tiro.
+   */
   function restartGame() {
     gameOverScreen.classList.remove('show');
     totalShots = 0;
@@ -236,6 +277,31 @@
     game.input.onUp.add(release, this);
   }
 
+  /**
+   * Funzione di aggiornamento chiamata automaticamente ad ogni frame dal motore Phaser.
+   * 
+   * Gestisce il comportamento del gioco durante lo stato attivo:
+   * - Controlla la comparsa del bordo anteriore del canestro solo quando la palla sta cadendo.
+   * - Rimuove il bordo anteriore quando la palla sta salendo (quindi è stata lanciata verso l'alto).
+   * - Imposta la collisione della palla con il bordo del canestro solo quando la palla è in discesa.
+   * 
+   * Quando la palla supera il canestro:
+   * - Se passa tra i due bordi laterali (canestro centrato), viene considerato un punto:
+   *   - Incrementa il punteggio.
+   *   - Mostra un'emoji di successo ("win").
+   *   - Riproduce il suono di punteggio.
+   * - Se esce dai bordi del canestro:
+   *   - Mostra un'emoji di fallimento ("lose").
+   *   - Riproduce il suono di fallimento.
+   * 
+   * In entrambi i casi viene creata l'emoji con una breve animazione (tween).
+   * 
+   * Se la palla esce dallo schermo (in basso):
+   * - Disattiva la gravità temporaneamente.
+   * - Rimuove la palla.
+   * - Se sono stati eseguiti tutti i tiri (maxShots), termina il gioco.
+   * - Altrimenti crea una nuova palla per il prossimo tiro.
+   */
   function update() {
     if (!introShown) return;
 
@@ -296,6 +362,13 @@
     }
   }
 
+  /**
+   * Funzione che gestisce l’animazione di uscita dell’emoji.
+   * 
+   * Crea un tween che sposta l’emoji verso l’alto di 50 * scaleFactor pixel in 600 ms con easing elastico.
+   * Alla fine del movimento, rimuove (kill) l’emoji dal gioco.
+   * Dopo 450 ms, avvia un altro tween che fa svanire l’emoji (alpha a 0) in 300 ms.
+   */
   function tweenOut() {
     moveOutTween = game.add.tween(emoji).to({ y: emoji.y - (50 * scaleFactor) }, 600, Phaser.Easing.Elastic.In, true);
     moveOutTween.onComplete.add(() => emoji.kill(), this);
@@ -304,10 +377,26 @@
     }, 450);
   }
 
+  /**
+   * Funzione chiamata quando la palla colpisce il bordo del canestro (rim).
+   * Riproduce il suono associato al colpo sul bordo.
+   */
   function hitRim() {
     backboard.play();
   }
 
+  /**
+   * Funzione che crea una nuova palla nel gioco.
+   * 
+   * Se è la prima palla (isFirstBall == true), la genera esattamente al centro.
+   * Altrimenti sceglie casualmente una posizione tra tre possibili punti orizzontali.
+   * Imposta la posizione verticale fissa.
+   * Riproduce il suono di spawn.
+   * Aggiunge la palla come sprite al gioco e ne abilita la fisica P2 con un corpo circolare.
+   * Inizializza proprietà della palla (non lanciata, non sotto il canestro).
+   * Imposta la gravità a zero (per farla rimanere ferma finché non viene lanciata).
+   * Aggiorna i testi di punteggio e la loro visibilità.
+   */
   function createBall() {
     let xpos;
 
@@ -338,6 +427,16 @@
     high_score_bg.alpha = 0;
   }
 
+  /**
+   * Funzione chiamata quando l'utente preme/tocca lo schermo.
+   * 
+   * Controlla se il puntatore ha colpito il corpo della palla tramite il sistema di fisica P2.
+   * Se sì, memorizza la posizione iniziale del tocco e imposta la variabile isDown a true.
+   * Avvia un intervallo che aggiorna periodicamente la posizione iniziale del tocco ogni 200 ms,
+   * per rilevare movimenti più precisi durante il drag.
+   * 
+   * @param {Phaser.Pointer} pointer - L'oggetto puntatore che rappresenta la posizione del tocco/click.
+   */
   function click(pointer) {
     var bodies = game.physics.p2.hitTest(pointer.position, [ball.body]);
     if (bodies.length) {
@@ -349,6 +448,18 @@
     }
   }
 
+  /**
+   * Funzione chiamata quando l'utente rilascia il tocco o il click.
+   * 
+   * Se isDown è true (cioè c'era un tocco attivo sulla palla), cancella l'intervallo
+   * che aggiornava la posizione iniziale e imposta isDown a false.
+   * Memorizza la posizione finale del rilascio.
+   * Calcola la differenza orizzontale tra posizione iniziale e finale e la usa per calcolare
+   * la traiettoria orizzontale della palla.
+   * Infine chiama la funzione launch() con la traiettoria calcolata per far partire il lancio.
+   * 
+   * @param {Phaser.Pointer} pointer - L'oggetto puntatore che rappresenta la posizione del rilascio.
+   */
   function release(pointer) {
     if (isDown) {
       clearInterval(location_interval);
@@ -361,34 +472,57 @@
     }
   }
 
-function launch(x_traj) {
-  if (!ball.launched) {
-    // Correggi direzione orizzontale
-    if (ball.x < gameWidth / 2 && x_traj < 0) {
-      x_traj = -x_traj;
-    } else if (ball.x > gameWidth / 2 && x_traj > 0) {
-      x_traj = -x_traj;
-    }
+  /**
+   * Funzione che lancia la palla con una velocità orizzontale e verticale calcolata 
+   * in base alla traiettoria data dall'input dell'utente.
+   * 
+   * Prima corregge la direzione orizzontale della velocità per assicurarsi che la palla 
+   * venga lanciata verso l'esterno (a destra o sinistra) in base alla posizione iniziale della palla.
+   * 
+   * Imposta le proprietà fisiche della palla per abilitare la simulazione P2 (collisioni, gravità).
+   * Avvia l'animazione di riduzione della scala della palla.
+   * Riproduce il suono del lancio.
+   * Incrementa il contatore dei tiri effettuati e aggiorna la visualizzazione.
+   * 
+   * Se è il primo lancio (isFirstBall true), aggiorna la variabile per evitare che le palle successive
+   * vengano sempre generate al centro.
+   * 
+   * @param {number} x_traj - La componente orizzontale della velocità da applicare alla palla.
+   */
+  function launch(x_traj) {
+    if (!ball.launched) {
 
-    ball.body.setCircle(36 * scaleFactor * 0.6);
-    ball.body.setCollisionGroup(collisionGroup);
-    ball.launched = true;
-    game.physics.p2.gravity.y = 2500 * scaleFactor;
-    game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
-    ball.body.velocity.x = x_traj;
-    ball.body.velocity.y = -1500 * scaleFactor;
-    ball.body.rotateRight(x_traj / 3);
-    whoosh.play();
-    totalShots++;
-    updateShotsCounter();
+      if (ball.x < gameWidth / 2 && x_traj < 0) {
+        x_traj = -x_traj;
+      } else if (ball.x > gameWidth / 2 && x_traj > 0) {
+        x_traj = -x_traj;
+      }
 
-    if (isFirstBall) {
-      isFirstBall = false; // Cambia qui, dopo il primo lancio
+      ball.body.setCircle(36 * scaleFactor * 0.6);
+      ball.body.setCollisionGroup(collisionGroup);
+      ball.launched = true;
+      game.physics.p2.gravity.y = 2500 * scaleFactor;
+      game.add.tween(ball.scale).to({ x: 0.6 * scaleFactor, y: 0.6 * scaleFactor }, 500, Phaser.Easing.Linear.None, true);
+      ball.body.velocity.x = x_traj;
+      ball.body.velocity.y = -1500 * scaleFactor;
+      ball.body.rotateRight(x_traj / 3);
+      whoosh.play();
+      totalShots++;
+      updateShotsCounter();
+
+      if (isFirstBall) {
+        isFirstBall = false;
+      }
     }
   }
-}
 
-
+  /**
+   * Funzione chiamata quando il gioco termina.
+   * 
+   * Rimuove i listener degli input per evitare ulteriori interazioni con il gioco.
+   * Mostra la schermata di fine partita (game over) aggiungendo la classe CSS 'show'.
+   * Aggiorna il testo del punteggio finale con il punteggio corrente ottenuto dal giocatore.
+   */
   function endGame() {
     game.input.onDown.remove(click, this);
     game.input.onUp.remove(release, this);
@@ -396,8 +530,5 @@ function launch(x_traj) {
     finalScoreText.textContent = "Punteggio finale: " + current_score;
   }
 </script>
-
-
-
 </body>
 </html>
