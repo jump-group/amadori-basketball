@@ -86,10 +86,15 @@
       game.load.image('side rim', 'assets/images/side_rim.png');
       game.load.image('front rim', 'assets/images/front_rim.png');
 
-      for (var i = 0; i <= 3; i++) {
-        game.load.image('win' + i, 'assets/images/win' + i + '.png');
-        game.load.image('lose' + i, 'assets/images/lose' + i + '.png');
-      }
+      var winImages = ['win0', 'win1', 'win2'];
+      var loseImages = ['lose0', 'lose1', 'lose2'];
+
+      winImages.forEach(function(name) {
+        game.load.image(name, 'assets/images/' + name + '.png');
+      });
+      loseImages.forEach(function(name) {
+        game.load.image(name, 'assets/images/' + name + '.png');
+      });
 
       game.load.audio('score', 'assets/audio/score.wav');
       game.load.audio('backboard', 'assets/audio/backboard.wav');
