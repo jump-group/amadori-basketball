@@ -1,7 +1,7 @@
 body {
     --green: #005832;
     --white: #FFF;
-    --yellow: #e0b000;
+    --yellow: #FFC511;
 
     margin: 0px;
     overflow: hidden;
@@ -81,6 +81,10 @@ body {
 
 .page .subtitle span {
     color: var(--yellow);
+}
+
+.page .subtitle span#max-shots-gameover {
+    color: var(--white);
 }
 
 .page .description {
