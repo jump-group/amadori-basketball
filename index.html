@@ -24,25 +24,32 @@
 
 </head>
 <body>
+
   <div class="page" id="pageIntro">
-    <img class="centeredLogo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
-    <h1>Benvenut*!</h1>
-    <div class="textContainer">
-        <p class="subtitle">Pront* per il <br> <span>Basket Corner</span> di Amadori? 🏀</p>
-        <p class="description">Metti alla prova il tuo talento! <br> Tira, segna e scala la classifica:  <br> più punti fai, più diventerai un PRO!</p>
+    <img src="assets/images/rainbow.png" alt="" class="rainbow" aria-hidden="true">
+    <div class="content">
+      <img class="logo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+      <h1 class="title">Sei un vero tiratore?</h1>
+      <div class="textContainer">
+          <p class="subtitle">Dimostralo nel <span>Basket Corner</span> di Amadori! 🏀</p>
+          <p class="description">60 secondi per fare più canestri possibili… <br> ricordati di sfruttare i bonus per diventare un vero PRO!</p>
+      </div>
+      <button class="button" id="startButton">Gioca ora</button>
     </div>
-    <button class="button" id="startButton">Gioca ora</button>
   </div>
 
   <div class="page" id="pageGameOver">
-    <img class="centeredLogo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
-    <h1>Game over</h1>
-    <div class="textContainer">
-        <p class="subtitle">Hai esaurito i tuoi <span id="max-shots-gameover">20</span> tiri 🏀 <br>
-        e totalizzato <span id="final-score">0</span> canestri! </p>
-        <p class="description">Riprova a supera il tuo record</p>
+    <img src="assets/images/rainbow.png" alt="" class="rainbow" aria-hidden="true">
+    <div class="content">
+      <img class="logo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+      <h1 class="title">Game over</h1>
+      <div class="textContainer">
+          <p class="subtitle">Hai esaurito i tuoi <span id="max-shots-gameover">20</span> tiri 🏀 <br>
+          e totalizzato <span id="final-score">0</span> canestri! </p>
+          <p class="description">Riprova a supera il tuo record</p>
+      </div>
+      <button class="button" id="restartButton">Gioca ancora</button>
     </div>
-    <button class="button" id="restartButton">Gioca ancora</button>
   </div>
 
   <div class="pageGameHeader">
@@ -72,7 +79,7 @@
     preload: preload,
     create: create,
     update: update
-  });
+  }, true);
 
   var introShown = false;
   var totalShots = 0;
@@ -163,8 +170,6 @@
     whoosh = game.add.audio('whoosh');
     fail = game.add.audio('fail'); fail.volume = 0.1;
     spawn = game.add.audio('spawn');
-
-    game.stage.backgroundColor = "#005832";
 
     field_background = game.add.sprite(game.world.centerX, game.world.height - 70, 'field');
     field_background.anchor.setTo(0.5, 1);
