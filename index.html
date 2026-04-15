@@ -14,10 +14,14 @@
   <!-- End Google Tag Manager -->
 
   <script src="js/phaser.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
+  <style>
+    /* Inline guarantee: even if Google Fonts is blocked/cached badly, Barlow is requested twice via different paths */
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@500;700&display=swap');
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,100;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;700&display=swap" rel="stylesheet">
 
   <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005832">
@@ -29,12 +33,13 @@
     <img src="assets/images/rainbow.png" alt="" class="rainbow" aria-hidden="true">
     <div class="content">
       <img class="logo" src="assets/images/amadori_logo.svg" alt="Logo Amadori">
+      <img src="assets/images/basket-corner.png" alt="Basket Corner" class="title-img">
       <h1 class="title">Sei un vero tiratore?</h1>
       <div class="textContainer">
           <p class="subtitle">Dimostralo nel <span>Basket Corner</span> di Amadori! 🏀</p>
           <p class="description">60 secondi per fare più canestri possibili… <br> ricordati di sfruttare i bonus per diventare un vero PRO!</p>
       </div>
-      <button class="button" id="startButton">Gioca ora</button>
+      <button class="button" id="startButton">GIOCA ORA!</button>
     </div>
   </div>
 
@@ -48,7 +53,7 @@
           e totalizzato <span id="final-score">0</span> canestri! </p>
           <p class="description">Riprova a supera il tuo record</p>
       </div>
-      <button class="button" id="restartButton">Gioca ancora</button>
+      <button class="button" id="restartButton">GIOCA ANCORA!</button>
     </div>
   </div>
 

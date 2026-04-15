@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@500;700&display=swap');
+
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -96,6 +98,13 @@ body {
     margin-bottom: clamp(20px, 4vh, 50px);
 }
 
+/* Title image (Basket Corner logo) */
+.page .title-img {
+    width: clamp(220px, 30vw, 460px);
+    height: auto;
+    margin-bottom: clamp(16px, 3vh, 36px);
+}
+
 /* Title */
 .page .title {
     font-family: 'Barlow', sans-serif;
@@ -147,6 +156,7 @@ body {
 /* Button */
 .button {
     font-family: 'Barlow', sans-serif;
+    font-style: normal;
     font-weight: 700;
     font-size: clamp(16px, 2vw, 32px);
     background-color: var(--white);
@@ -236,6 +246,10 @@ body {
         width: clamp(160px, 25vw, 280px);
     }
 
+    .page .title-img {
+        width: clamp(240px, 50vw, 420px);
+    }
+
     .page .title {
         font-size: clamp(28px, 5vw, 52px);
     }
@@ -258,6 +272,10 @@ body {
 @media screen and (max-width: 600px) {
     .page .logo {
         width: clamp(160px, 45vw, 240px);
+    }
+
+    .page .title-img {
+        width: clamp(220px, 70vw, 360px);
     }
 
     .page .title {
